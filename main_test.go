@@ -2,7 +2,6 @@ package cryptoutils_test
 
 import (
 	"bytes"
-	"cryproutils/utils"
 	"crypto/aes"
 	"crypto/md5"
 	"crypto/sha1"
@@ -13,6 +12,8 @@ import (
 	"fmt"
 	"hash"
 	"testing"
+
+	"www.gitlablow.com/wave4y/cryproutils/utils"
 
 	"golang.org/x/crypto/md4"
 )

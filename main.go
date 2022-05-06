@@ -1,7 +1,7 @@
 package cryptoutils
 
 import (
-	"cryproutils/utils"
+	"www.gitlablow.com/wave4y/cryproutils/utils"
 )
 
 func Init(src interface{}) *utils.CryptoData {
