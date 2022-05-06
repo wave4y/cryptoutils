@@ -1,4 +1,4 @@
-module cryproutils
+module cryptoutils
 
 go 1.16
 
