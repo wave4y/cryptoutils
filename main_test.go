@@ -13,14 +13,13 @@ import (
 	"hash"
 	"testing"
 
-	"www.gitlablow.com/wave4y/cryproutils/utils"
-
 	"golang.org/x/crypto/md4"
+	"www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func main() {
 	// Hash([]byte("a"), "md5")
-	a := utils.Init("1")
+	a := cryptoutils.Init("1")
 	a.SetKey([]byte("11111111"))
 	// a.Hex().Hash("md5").String()
 	// a.Md5().Base64Encode().String()
