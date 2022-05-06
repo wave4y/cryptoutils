@@ -1,4 +1,4 @@
-module cryptoutils
+module www.gitlablow.com/wave4y/cryptoutils
 
 go 1.16
 
