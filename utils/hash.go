@@ -9,6 +9,7 @@ import (
 	"hash"
 
 	"golang.org/x/crypto/md4"
+	"www.gitlablow.com/wave4y/cryptoutils/sm3"
 )
 
 func (p *CryptoData) Md4() *CryptoData {
@@ -51,6 +52,15 @@ func (p *CryptoData) Sha256() *CryptoData {
 func (p *CryptoData) Sha512() *CryptoData {
 	p.checkFirst()
 	hash := sha512.New()
+	hash.Write(p.data)
+	dst := hash.Sum(nil)
+	p.data = []byte(hex.EncodeToString(dst))
+	return p
+}
+
+func (p *CryptoData) Sm3() *CryptoData {
+	p.checkFirst()
+	hash := sm3.New()
 	hash.Write(p.data)
 	dst := hash.Sum(nil)
 	p.data = []byte(hex.EncodeToString(dst))
