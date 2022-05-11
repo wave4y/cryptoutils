@@ -1,7 +1,5 @@
 package utils
 
-import "fmt"
-
 type CryptoData struct {
 	data  []byte
 	raw   []byte
@@ -34,7 +32,6 @@ func (p *CryptoData) String() string {
 	p.checkFirst()
 
 	p.first = true
-	fmt.Printf("%s\n", p.data)
 	return string(p.data)
 }
 

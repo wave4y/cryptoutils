@@ -5,7 +5,7 @@
 ## 用法
 
 ```go
-pakcage main
+package main
 
 import(
 
@@ -17,3 +17,5 @@ func main(){
 }
 ```
 
+## todo
+1. 添加国密算法 ` go get -u github.com/tjfoc/gmsm `
