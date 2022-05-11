@@ -15,6 +15,7 @@ import (
 
 	"golang.org/x/crypto/md4"
 	"www.gitlablow.com/wave4y/cryptoutils"
+	"www.gitlablow.com/wave4y/cryptoutils/sm3"
 )
 
 func main() {
@@ -25,6 +26,20 @@ func main() {
 	// a.Md5().Base64Encode().String()
 	// a.Md5().Base64Encode().String()
 	a.DesCBCEncrypt().Hex().String()
+
+	//sm3 sm4 加解密示例
+	hash := sm3.New()
+	hash.Write([]byte("123456"))
+
+	result := hash.Sum(nil)
+	println("sm3 hash = ", hex.EncodeToString(result))
+
+	// at := []byte("123456")
+	// key := []byte("abc.123")
+	// decrypto := sm4.SM4Encrypt(at, key)
+	// fmt.Println("sm4加密后：", hex.EncodeToString(decrypto))
+	// i := sm4.SM4Decrypto(decrypto, key)
+	// fmt.Println("sm4解密后：", string(i))
 	// fmt.Println(a)
 	// c4ca4238a0b923820dcc509a6f75849b
 
