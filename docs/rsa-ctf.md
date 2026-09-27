@@ -80,6 +80,8 @@ result, err := cryptoutils.Init("A").
 所有函数不修改传入的 `big.Int`。输入不符合条件时返回 `ErrInvalidRSACTFInput`，
 攻击条件不成立或在预算内未找到结果时返回 `ErrRSACTFNoResult`，可用 `errors.Is` 判断。
 `RSAIntegerRoot` 的非精确结果通过 bool 表达，不作为错误。
+平方根使用 `big.Int.Sqrt`，更高次数使用整数牛顿迭代，并以整数幂判断是否精确，
+不依赖浮点精度。
 
 ## 与标准 RSA 接口对接
 
@@ -106,3 +108,8 @@ go vet ./...
 测试包含普通和边界整数、精确根与失败预算、输入不被修改，以及从泄露 φ 恢复
 2048 位密钥后对接 OAEP 和 PEM 的端到端样例。该样例主动提供 φ，不能视为破解
 无泄露的正常 RSA。
+
+`rsactf/testdata/rsactftool.json` 固定了 RsaCtfTool 的四组真实参数及来源提交：
+近素数 Fermat、Håstad 广播、共模题参数的低指数恢复、cube_root 自测题。
+回归测试同时核对期望明文和全部密文的重新加密结果。其中共模题的指数为 6/9，
+测试使用 `LowExponent`，不表示 `CommonModulus` 已支持非互素指数。

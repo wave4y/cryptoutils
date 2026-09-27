@@ -20,23 +20,28 @@ func IntegerRoot(x *big.Int, degree uint) (*big.Int, bool, error) {
 		return root, new(big.Int).Mul(root, root).Cmp(x) == 0, nil
 	}
 
-	// This upper bound is strictly larger than the root. Computing the
-	// ceiling this way avoids overflow from adding degree to the bit length.
+	// Start above the real root. Computing the ceiling this way avoids
+	// overflow from adding degree to the bit length.
 	bits := (uint(x.BitLen())-1)/degree + 1
-	lo := big.NewInt(1)
-	hi := new(big.Int).Lsh(big.NewInt(1), bits)
+	root := new(big.Int).Lsh(big.NewInt(1), bits)
 	exponent := new(big.Int).SetUint64(uint64(degree))
-	one := big.NewInt(1)
-	for new(big.Int).Sub(hi, lo).Cmp(one) > 0 {
-		mid := new(big.Int).Rsh(new(big.Int).Add(lo, hi), 1)
-		power := new(big.Int).Exp(mid, exponent, nil)
-		if power.Cmp(x) <= 0 {
-			lo = mid
-		} else {
-			hi = mid
+	previousExponent := new(big.Int).Sub(exponent, big.NewInt(1))
+	power, quotient, next := new(big.Int), new(big.Int), new(big.Int)
+	for {
+		// Integer Newton step: ((degree-1)*root + x/root^(degree-1))/degree.
+		// Starting above the real root, this strictly decreases until the
+		// floor root, never undershooting it. At the floor root it may
+		// increase, so stop at the first nondecreasing step to avoid cycles.
+		power.Exp(root, previousExponent, nil)
+		quotient.Quo(x, power)
+		next.Mul(root, previousExponent)
+		next.Add(next, quotient)
+		next.Quo(next, exponent)
+		if next.Cmp(root) >= 0 {
+			return root, power.Mul(power, root).Cmp(x) == 0, nil
 		}
+		root, next = next, root
 	}
-	return lo, new(big.Int).Exp(lo, exponent, nil).Cmp(x) == 0, nil
 }
 
 // CRT combines at least two congruences with pairwise coprime moduli > 1.
