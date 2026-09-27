@@ -1,43 +1,82 @@
+// Package cryptoutils provides chainable encoding, hashing and encryption helpers.
 package cryptoutils
 
+import "fmt"
+
+// CryptoData is a mutable processing chain. It is not safe for concurrent use.
+// The first error stops subsequent transformations until Reset is called.
 type CryptoData struct {
-	data  []byte
-	raw   []byte
-	first bool
-	key   []byte
+	data    []byte
+	raw     []byte
+	key     []byte
+	err     error
+	initErr error
 }
 
+// Init copies a string or byte slice. A nil input represents empty data.
+// Unsupported input types are reported by Err and Result.
 func Init(src interface{}) *CryptoData {
-	var data []byte
+	p := new(CryptoData)
 	switch src := src.(type) {
+	case nil:
 	case string:
-		data = []byte(src)
+		p.raw = []byte(src)
 	case []byte:
-		data = src
+		p.raw = cloneBytes(src)
+	default:
+		p.initErr = fmt.Errorf("%w: %T", ErrUnsupportedInput, src)
 	}
-
-	return &CryptoData{
-		data:  data,
-		raw:   data,
-		first: true,
-		key:   []byte(""),
-	}
+	return p.Reset()
 }
 
+// SetKey copies key. It does not clear an existing error.
 func (p *CryptoData) SetKey(key []byte) {
-	p.key = key
+	p.key = cloneBytes(key)
 }
 
+// String returns the current data without changing the chain. On error it
+// returns an empty string; use Err or Result to distinguish failure from empty data.
 func (p *CryptoData) String() string {
-	p.checkFirst()
-
-	p.first = true
 	return string(p.data)
 }
 
-func (p *CryptoData) checkFirst() {
-	if p.first {
-		p.data = p.raw
-		p.first = false
+// Bytes returns a copy of the current data, or nil if the chain has failed.
+func (p *CryptoData) Bytes() []byte {
+	return cloneBytes(p.data)
+}
+
+// Err returns the first error encountered by the chain.
+func (p *CryptoData) Err() error { return p.err }
+
+// Result returns a copy of the current data and any processing error.
+func (p *CryptoData) Result() ([]byte, error) {
+	if p.err != nil {
+		return nil, p.err
 	}
+	return p.Bytes(), nil
+}
+
+// Reset restores the original input and clears processing errors, retaining the
+// key. An invalid Init input remains invalid after Reset.
+func (p *CryptoData) Reset() *CryptoData {
+	p.data = cloneBytes(p.raw)
+	p.err = p.initErr
+	return p
+}
+
+func (p *CryptoData) fail(err error) *CryptoData {
+	if p.err == nil && err != nil {
+		p.err = err
+		p.data = nil
+	}
+	return p
+}
+
+func cloneBytes(src []byte) []byte {
+	if src == nil {
+		return nil
+	}
+	dst := make([]byte, len(src))
+	copy(dst, src)
+	return dst
 }

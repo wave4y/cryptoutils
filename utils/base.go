@@ -1,43 +1,11 @@
+// Package utils retains the historical import path and CTF helpers.
+// Cryptographic operations delegate to the root cryptoutils package.
 package utils
 
-type CryptoData struct {
-	data  []byte
-	raw   []byte
-	first bool
-	key   []byte
-}
+import "www.gitlablow.com/wave4y/cryptoutils"
 
-func Init(src interface{}) *CryptoData {
-	var data []byte
-	switch src := src.(type) {
-	case string:
-		data = []byte(src)
-	case []byte:
-		data = src
-	}
+// CryptoData is the shared implementation from the root package.
+type CryptoData = cryptoutils.CryptoData
 
-	return &CryptoData{
-		data:  data,
-		raw:   data,
-		first: true,
-		key:   []byte(""),
-	}
-}
-
-func (p *CryptoData) SetKey(key []byte) {
-	p.key = key
-}
-
-func (p *CryptoData) String() string {
-	p.checkFirst()
-
-	p.first = true
-	return string(p.data)
-}
-
-func (p *CryptoData) checkFirst() {
-	if p.first {
-		p.data = p.raw
-		p.first = false
-	}
-}
+// Init creates a processing chain. Prefer cryptoutils.Init for new code.
+func Init(src interface{}) *CryptoData { return cryptoutils.Init(src) }

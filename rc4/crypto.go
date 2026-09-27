@@ -2,12 +2,13 @@ package utils
 
 import (
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/rc4"
 	"encoding/base64"
 	"encoding/hex"
-	"math/rand"
+	"fmt"
+	"io"
 	"net/url"
-	"time"
 )
 
 func Md5Encode(plain string) string {
@@ -34,16 +35,33 @@ func HexEncode(plain string) string {
 	return hex.EncodeToString([]byte(plain))
 }
 
-func HexDecode(cipher string) string {
+// HexDecodeE decodes hexadecimal text, returning an error for invalid input.
+func HexDecodeE(cipher string) (string, error) {
 	plain, err := hex.DecodeString(cipher)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return string(plain)
+	return string(plain), nil
 }
 
-func UrlDncode(plain string) string {
+// HexDecode decodes hexadecimal text and returns an empty string on error.
+//
+// Deprecated: Use HexDecodeE to check decoding errors.
+func HexDecode(cipher string) string {
+	plain, _ := HexDecodeE(cipher)
+	return plain
+}
+
+// UrlEncode escapes a string for use in a URL query.
+func UrlEncode(plain string) string {
 	return url.QueryEscape(plain)
+}
+
+// UrlDncode is the original misspelled alias for UrlEncode.
+//
+// Deprecated: Use UrlEncode.
+func UrlDncode(plain string) string {
+	return UrlEncode(plain)
 }
 
 func UrlDecode(cipher string) (string, error) {
@@ -54,66 +72,94 @@ func UrlDecode(cipher string) (string, error) {
 	return plain, nil
 }
 
-func RandomString(l int) string {
-	rand.Seed(time.Now().UnixNano() / 5)
-	str := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	b := make([]byte, l)
-	for i := range b {
-		b[i] = str[rand.Intn(len(str))]
-	}
-	return string(b)
+const randomAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+// RandomStringE returns l uniformly distributed alphanumeric characters using
+// crypto/rand. A negative length or random source failure returns an error.
+func RandomStringE(l int) (string, error) {
+	return randomStringFromReader(l, rand.Reader)
 }
 
-func Rc4Encrypt(plain string, key []byte) string {
+func randomStringFromReader(l int, source io.Reader) (string, error) {
+	if l < 0 {
+		return "", fmt.Errorf("random string: length must be non-negative")
+	}
+	result := make([]byte, l)
+	var buffer [128]byte
+	// Reject the incomplete range so every character has equal probability.
+	const limit = 256 - 256%len(randomAlphabet)
+	for written := 0; written < l; {
+		count := l - written
+		if count > len(buffer) {
+			count = len(buffer)
+		}
+		if _, err := io.ReadFull(source, buffer[:count]); err != nil {
+			return "", fmt.Errorf("random string: %w", err)
+		}
+		for _, value := range buffer[:count] {
+			if int(value) >= limit {
+				continue
+			}
+			result[written] = randomAlphabet[int(value)%len(randomAlphabet)]
+			written++
+		}
+	}
+	return string(result), nil
+}
+
+// RandomString returns a random alphanumeric string, or an empty string on error.
+//
+// Deprecated: Use RandomStringE to check length and random source errors.
+func RandomString(l int) string {
+	result, _ := RandomStringE(l)
+	return result
+}
+
+// RC4Encrypt encrypts plaintext and returns lowercase hexadecimal ciphertext.
+// RC4 is insecure and is retained only for legacy protocols and CTF use.
+//
+// Deprecated: Use the root package's AES-GCM API for new applications.
+func RC4Encrypt(plain string, key []byte) (string, error) {
 	src := []byte(plain)
 	cipher, err := rc4.NewCipher(key)
 	if err != nil {
-		return ""
+		return "", err
 	}
 	dst := make([]byte, len(src))
 	cipher.XORKeyStream(dst, src)
-	return HexEncode(string(dst))
+	return hex.EncodeToString(dst), nil
 }
 
-func Rc4Decrypt(plain string, key []byte) string {
-	src := []byte(HexDecode(plain))
+// RC4Decrypt decrypts hexadecimal RC4 ciphertext. RC4 provides no authentication:
+// a wrong key or validly encoded tampering cannot be detected.
+//
+// Deprecated: Use the root package's AES-GCM API for new applications.
+func RC4Decrypt(encoded string, key []byte) (string, error) {
+	src, err := hex.DecodeString(encoded)
+	if err != nil {
+		return "", err
+	}
 	cipher, err := rc4.NewCipher(key)
 	if err != nil {
-		return ""
+		return "", err
 	}
 	dst := make([]byte, len(src))
 	cipher.XORKeyStream(dst, src)
-	return string(dst)
+	return string(dst), nil
 }
 
-func main() {
-	// cipher := md5encode("1")
-	// fmt.Print(cipher)
-	// plain := "YQ=="
-	// plain2, err := base64decode(plain)
-	// if err != nil {
-	// 	return
-	// }
-	// fmt.Println(plain2)
-	// b := "61616#```  }++   1"
-	// // a, _ := hexdecode(b)
-	// a := Urlencode(b)
-	// fmt.Println(a)
-	// fmt.Println(RandomString(5))
+// Rc4Encrypt encrypts using RC4 and returns an empty string on error.
+//
+// Deprecated: Use RC4Encrypt for legacy protocols, or AES-GCM for new applications.
+func Rc4Encrypt(plain string, key []byte) string {
+	result, _ := RC4Encrypt(plain, key)
+	return result
+}
 
-	// var key []byte = []byte("fd6cde7c2faaaaaaaaaaaaa4913f22297c948dd530c84")
-	// cipher := Rc4Encrypt("helloworld", key)
-	// plain := Rc4Decrypt("bc304151292024a78919", key)
-	// // fmt.Println(HexDecode(string(plain)))
-	// fmt.Println(cipher)
-	// fmt.Println(plain)
-	// a, _ := HexDecode("7789a81f0c8308713ab0")
-	// rc4obj1, _ := rc4.NewCipher(key)
-	// rc4str1 := []byte(a)
-	// plaintext := make([]byte, len(rc4str1))
-	// rc4obj1.XORKeyStream(plaintext, rc4str1)
-	// // stringf1 := fmt.Sprintf("%x", plaintext)
-	// stringf1 := HexEncode(string(plaintext))
-	// fmt.Println(stringf1)
-	// fmt.Println(HexDecode(stringf1))
+// Rc4Decrypt decrypts hexadecimal RC4 ciphertext and returns an empty string on error.
+//
+// Deprecated: Use RC4Decrypt for legacy protocols, or AES-GCM for new applications.
+func Rc4Decrypt(encoded string, key []byte) string {
+	result, _ := RC4Decrypt(encoded, key)
+	return result
 }

@@ -1,40 +1,25 @@
 package utils
 
-import (
-	"bytes"
-	"fmt"
-)
+import "www.gitlablow.com/wave4y/cryptoutils"
 
-func padding(src []byte, blockSize int) []byte {
-	length := blockSize - len(src)%blockSize
-	paddingStr := bytes.Repeat([]byte{byte(length)}, length)
-	nsrc := append(src, paddingStr...)
-
-	return nsrc
+// PKCS7Padding delegates to the root implementation.
+func PKCS7Padding(src []byte, blockSize int) ([]byte, error) {
+	return cryptoutils.PKCS7Padding(src, blockSize)
 }
 
-//去掉填充串
-func unPadding(src []byte) []byte {
-	//填充长度
-	length := int(src[len(src)-1])
-	src = src[:(len(src) - length)]
-
-	return src
+// PKCS7UnPadding delegates to the root implementation.
+func PKCS7UnPadding(src []byte, blockSize int) ([]byte, error) {
+	return cryptoutils.PKCS7UnPadding(src, blockSize)
 }
 
-func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
+// PKCS5Padding retains the historical wrapper.
+// Deprecated: use PKCS7Padding, which returns validation errors.
+func PKCS5Padding(src []byte, blockSize int) []byte {
+	return cryptoutils.PKCS5Padding(src, blockSize)
 }
 
-// 去除PKCS5填充
-func PKCS5UnPadding(origData []byte) ([]byte, error) {
-	length := len(origData)
-	unpadding := int(origData[length-1])
-
-	if length < unpadding {
-		return nil, fmt.Errorf("invalid unpadding length")
-	}
-	return origData[:(length - unpadding)], nil
+// PKCS5UnPadding retains the historical wrapper for 8-byte blocks.
+// Deprecated: use PKCS7UnPadding with an explicit block size.
+func PKCS5UnPadding(src []byte) ([]byte, error) {
+	return cryptoutils.PKCS5UnPadding(src)
 }

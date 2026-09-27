@@ -4,10 +4,10 @@ import (
 	"hash"
 )
 
-//Size The size of a SM3 checksum in bytes.
+// Size The size of a SM3 checksum in bytes.
 const Size = 32
 
-//BlockSize The blocksize of SM3 in bytes.
+// BlockSize The blocksize of SM3 in bytes.
 const BlockSize = 64
 
 const (
@@ -77,7 +77,7 @@ func (d *digest) Write(p []byte) (nn int, err error) {
 	return
 }
 
-//Sum sum is add
+// Sum sum is add
 func (d *digest) Sum(in []byte) []byte {
 	// Make a copy of d0 so that caller can keep writing and summing.
 	d1 := *d

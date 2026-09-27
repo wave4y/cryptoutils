@@ -1,23 +1,35 @@
 package utils
 
-import "fmt"
+import "strings"
 
+// Str2oct encodes the string's bytes as octal escapes in Bash ANSI-C quotes.
 func Str2oct(command string) string {
-	var command8 string
-
-	for _, c := range command {
-		command8 += fmt.Sprintf("\\%03o", c)
+	var result strings.Builder
+	result.Grow(4*len(command) + 3)
+	result.WriteString("$'")
+	for i := 0; i < len(command); i++ {
+		c := command[i]
+		result.WriteByte('\\')
+		result.WriteByte('0' + c>>6)
+		result.WriteByte('0' + (c>>3)&7)
+		result.WriteByte('0' + c&7)
 	}
-	command8 = fmt.Sprintf("$'%s'", command8)
-	return command8
+	result.WriteByte('\'')
+	return result.String()
 }
 
+// Str2hex encodes the string's bytes as hexadecimal escapes in Bash ANSI-C quotes.
 func Str2hex(command string) string {
-	var command16 string
-
-	for _, c := range command {
-		command16 += fmt.Sprintf("\\x%02x", c)
+	const digits = "0123456789abcdef"
+	var result strings.Builder
+	result.Grow(4*len(command) + 3)
+	result.WriteString("$'")
+	for i := 0; i < len(command); i++ {
+		c := command[i]
+		result.WriteString("\\x")
+		result.WriteByte(digits[c>>4])
+		result.WriteByte(digits[c&15])
 	}
-	command16 = fmt.Sprintf("$'%s'", command16)
-	return command16
+	result.WriteByte('\'')
+	return result.String()
 }
