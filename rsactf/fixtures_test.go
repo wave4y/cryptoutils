@@ -82,6 +82,8 @@ func TestRsaCtfToolRealFixtures(t *testing.T) {
 						t.Fatal("no private exponent")
 					}
 					m, err = rsactf.DecryptRaw(n, d, c)
+				} else if tc.Method == "common_modulus" {
+					m, err = rsactf.CommonModulus(n, e, c, parse(t, tc.Params["e1"]), parse(t, tc.Params["c1"]))
 				} else {
 					m, err = rsactf.LowExponent(n, e, c, 10000)
 				}

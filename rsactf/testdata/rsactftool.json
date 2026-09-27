@@ -1,7 +1,7 @@
 {
   "upstream": "https://github.com/RsaCtfTool/RsaCtfTool",
   "commit": "fb8532a54227b61f99277bd09483a3570c02c8f8",
-  "notes": "Public numeric challenge fixtures. Ciphertext encodings and pairings are explicit. common_modulus uses e=6/9 and is solved here by low-exponent enumeration, not the coprime-exponent API. Hastad ciphertexts come from tests/test_attacks.py; cube root from the attack self-test.",
+  "notes": "Public numeric challenge fixtures. Ciphertext encodings and pairings are explicit. common_modulus uses e=6/9 and is solved by exact-root common-modulus recovery. Hastad ciphertexts come from tests/test_attacks.py; cube root from the attack self-test.",
   "cases": [
     {
       "id": "close_primes_close_primes_cipher",
@@ -20,7 +20,7 @@
     },
     {
       "id": "common_modulus_pair",
-      "method": "low_exponent",
+      "method": "common_modulus",
       "params": {
         "n": "3233",
         "e": "6",

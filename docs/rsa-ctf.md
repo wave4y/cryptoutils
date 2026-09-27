@@ -101,15 +101,18 @@ message, err := cryptoutils.DecryptRSARaw(params.N, params.D, big.NewInt(2790))
 | `RSACRT(moduli,residues)` | 至少两个模数，要求两两互素且每个余数在 [0,n) 内。 |
 | `RSALowExponent(n,e,c,maxK)` | 对 k=0..maxK 尝试 c+k*n 的精确 e 次根；2≤e≤64。 |
 | `RSABroadcast(moduli,ciphertexts,e)` | 同明文、同 e、互素模数；CRT 结果精确开根并验证所有观测，2≤e≤64。 |
-| `RSACommonModulus(n,e1,c1,e2,c2)` | 同模同明文、互素正指数；负指数需要可逆密文。 |
+| `RSACommonModulus(n,e1,c1,e2,c2)` | 同模同明文；支持互素指数及非互素指数的精确根分支，结果对两组观测验证。 |
 | `RSASharedFactor(n1,n2)` | 返回两个模数共有且对二者均非平凡的因子。 |
 | `RSAFermat(n,maxSteps)` | 搜索近因子，最多检查 maxSteps 个 a²−n；偶数直接返回 2。 |
 | `RSAFactorFromPhi(n,phi)` | 根据两素数模数的 n 与 φ 恢复因子，检查判别式与输入关系。 |
-| `RSAFactorFromCRTExponent(n,e,dp,attempts)` | 从底数 2 起有限次尝试 gcd(a^(e*dp−1)−1,n)；dp 可替换为 dq。 |
+| `RSAFactorFromCRTExponent(n,e,dp,attempts)` | 从底数 2 起有限次尝试 GCD，平凡结果增加重复平方回退；dp 可替换为 dq。 |
 
 搜索预算是迭代次数，不是墙钟超时；一次大整数运算也可能耗时。方法未找到结果不证明
-数学上无解。`RSACommonModulus` 不处理一般非互素指数；CRT 泄露仅提供 GCD 方法，
-没有枚举 k 的回退。广播接口要求所有观测对应同一明文。
+数学上无解。共模非互素指数分支对 g=gcd(e1,e2) 尝试精确整数根，通常要求 m^g<n；
+若密文不可逆而暴露了因子，则在 n 为两个不同素数之积且至少一个 e 对 λ(n) 可逆时
+尝试解密，并对两组密文验证。它不是一般模方程求根器。
+CRT 泄露的重复平方回退可处理直接 GCD 总得到 n 的部分情形，attempts 仍表示底数数量，
+不引入无限搜索或枚举 k。广播接口要求所有观测对应同一明文。
 
 所有函数不修改传入的 `big.Int`。输入不符合条件时返回 `ErrInvalidRSACTFInput`，
 攻击条件不成立或在预算内未找到结果时返回 `ErrRSACTFNoResult`，可用 `errors.Is` 判断。
@@ -144,6 +147,6 @@ go vet ./...
 无泄露的正常 RSA。
 
 `rsactf/testdata/rsactftool.json` 固定了 RsaCtfTool 的四组真实参数及来源提交：
-近素数 Fermat、Håstad 广播、共模题参数的低指数恢复、cube_root 自测题。
+近素数 Fermat、Håstad 广播、非互素指数共模、cube_root 自测题。
 回归测试同时核对期望明文和全部密文的重新加密结果。其中共模题的指数为 6/9，
-测试使用 `LowExponent`，不表示 `CommonModulus` 已支持非互素指数。
+现在直接由 `CommonModulus` 恢复整数明文 12。

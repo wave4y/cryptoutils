@@ -246,16 +246,16 @@ func TestCommonModulus(t *testing.T) {
 	}
 	plain, err := rsactf.CommonModulus(n, integer(7), integer(0), integer(11), integer(0))
 	requireInteger(t, plain, err, 0)
-	_, err = rsactf.CommonModulus(n, integer(3), integer(8), integer(9), integer(512))
-	requireError(t, err, rsactf.ErrNoResult)
+	plain, err = rsactf.CommonModulus(n, integer(3), integer(8), integer(9), integer(512))
+	requireInteger(t, plain, err, 2)
 	_, err = rsactf.CommonModulus(n, integer(0), integer(8), integer(11), integer(512))
 	requireError(t, err, rsactf.ErrInvalidInput)
-	// An exponent with a negative Bezout coefficient needs an invertible ciphertext.
+	// Noninvertible ciphertexts expose a factor and enable private-key recovery.
 	n = integer(11413)
 	c1 := new(big.Int).Exp(integer(101), integer(7), n)
 	c2 := new(big.Int).Exp(integer(101), integer(11), n)
-	_, err = rsactf.CommonModulus(n, integer(7), c1, integer(11), c2)
-	requireError(t, err, rsactf.ErrNoResult)
+	plain, err = rsactf.CommonModulus(n, integer(7), c1, integer(11), c2)
+	requireInteger(t, plain, err, 101)
 }
 
 func TestFermat(t *testing.T) {

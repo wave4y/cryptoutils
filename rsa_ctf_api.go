@@ -49,7 +49,9 @@ func RSABroadcast(moduli, ciphertexts []*big.Int, e uint) (*big.Int, error) {
 	return rsactf.Broadcast(moduli, ciphertexts, e)
 }
 
-// RSACommonModulus combines two encryptions of one plaintext using coprime exponents.
+// RSACommonModulus combines two encryptions of one plaintext. For noncoprime
+// exponents it attempts an exact root; a ciphertext exposing a factor can also
+// enable two-prime recovery. Every result is checked against both ciphertexts.
 func RSACommonModulus(n, e1, c1, e2, c2 *big.Int) (*big.Int, error) {
 	return rsactf.CommonModulus(n, e1, c1, e2, c2)
 }
@@ -63,7 +65,8 @@ func RSAFermat(n *big.Int, maxSteps uint64) (*big.Int, error) { return rsactf.Fe
 // RSAFactorFromPhi recovers a prime factor given n=p*q and phi=(p-1)*(q-1), p!=q.
 func RSAFactorFromPhi(n, phi *big.Int) (*big.Int, error) { return rsactf.FactorFromPhi(n, phi) }
 
-// RSAFactorFromCRTExponent tries attempts bases to recover a factor from a leaked dp or dq.
+// RSAFactorFromCRTExponent tries attempts bases to recover a factor from a
+// leaked dp or dq, including a repeated-squaring fallback for a trivial GCD.
 func RSAFactorFromCRTExponent(n, e, dp *big.Int, attempts uint64) (*big.Int, error) {
 	return rsactf.FactorFromCRTExponent(n, e, dp, attempts)
 }
