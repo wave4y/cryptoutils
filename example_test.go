@@ -3,6 +3,8 @@ package cryptoutils_test
 import (
 	"crypto/rand"
 	"fmt"
+	"math/big"
+
 	c "github.com/wave4y/cryptoutils"
 )
 
@@ -31,4 +33,29 @@ func ExampleEncryptAESGCM() {
 	}
 	fmt.Println(string(plaintext))
 	// Output: hello
+}
+
+func ExampleDecryptRSARaw() {
+	m, err := c.DecryptRSARaw(big.NewInt(3233), big.NewInt(2753), big.NewInt(2790))
+	if err != nil {
+		panic(err)
+	}
+	plaintext, err := c.RSAIntegerToBytes(m, 0)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(plaintext))
+	// Output: A
+}
+
+func ExampleCryptoData_RSARawEncrypt() {
+	result, err := c.Init("A").
+		RSARawEncrypt(big.NewInt(3233), big.NewInt(17)).
+		RSARawDecrypt(big.NewInt(3233), big.NewInt(2753), 0).
+		Result()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(result))
+	// Output: A
 }

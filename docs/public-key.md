@@ -4,6 +4,8 @@
 
 ## RSA
 
+小模数、大指数、裸模幂及泄露参数题目使用独立的 [rsactf 数学接口](rsa-ctf.md)；下面的 OAEP/PSS 保持标准密钥和填充要求。
+
 ```go
 privateKey, err := cryptoutils.GenerateRSAKey(2048)
 ciphertext, err := cryptoutils.EncryptRSAOAEP(message, &privateKey.PublicKey, label)

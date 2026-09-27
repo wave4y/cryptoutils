@@ -9,6 +9,7 @@
 | [架构与测试组织](architecture.md) | 根包与内部实现职责、依赖方向、`tests/api`、算法单元测试和覆盖率命令 |
 | [摘要、HMAC、密钥派生和密码哈希](hash-kdf.md) | 摘要算法、SHAKE、通用 HMAC、PBKDF2、HKDF、scrypt、Argon2id、bcrypt |
 | [对称加密、模式与 MAC](symmetric.md) | AEAD、分组模式、CCM、XTS、CMAC、Poly1305、ZUC |
+| [RSA 数学与 CTF](rsa-ctf.md) | 裸模幂、CRT、整数根及有限预算的 RSA 攻击 |
 | [公钥、签名、密钥协商与 PEM/DER](public-key.md) | RSA、ECDSA、Ed25519、ECDH、X25519、ElGamal 和密钥编码 |
 | [SM2](sm2.md) | 签名、加解密、身份标识和带确认的密钥交换 |
 | [SM9](sm9.md) | 基于身份的签名、加解密和密钥封装 |

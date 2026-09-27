@@ -39,6 +39,7 @@ func main() {
 | 摘要、认证与派生 | [SHA-2/3、SHAKE、Keccak、BLAKE2、SM3、HMAC、PBKDF2/HKDF、scrypt/Argon2id、bcrypt](docs/hash-kdf.md) |
 | 对称加密 | [AES/SM4、ChaCha20-Poly1305、GCM/CCM、分组模式、XTS、CMAC/Poly1305、ZUC 及传统算法](docs/symmetric.md) |
 | 公钥与密钥格式 | [RSA、ECDSA、Ed25519、ECDH/X25519、ElGamal、PEM/DER](docs/public-key.md) |
+| RSA 数学与 CTF | [裸 RSA、大整数根、CRT、低指数/广播/共模、Fermat 与参数泄露](docs/rsa-ctf.md) |
 | 国密协议 | [SM2 签名、加密、密钥交换](docs/sm2.md)；[SM9 身份签名、加密与 KEM](docs/sm9.md) |
 | 后量子 | [ML-KEM、ML-DSA、SLH-DSA](docs/pqc.md) |
 
@@ -60,6 +61,7 @@ cryptoutils/
 │   ├── derivation/                   # KDF、密码哈希与参数检查
 │   └── idea/                         # IDEA 分组原语
 ├── sm2/ sm3/ sm4/ sm9/ zuc/          # 独立国密算法包
+├── rsactf/                           # RSA 数学与 CTF 原语
 ├── pqc/                              # 后量子 API、内部原语与向量
 ├── utils/ rc4/                       # 历史兼容入口
 ├── tests/api/                        # 从使用者视角验证公开 API
