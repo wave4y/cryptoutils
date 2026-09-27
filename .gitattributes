@@ -1,0 +1,13 @@
+# Keep source and documentation consistent across Windows and Unix.
+* text=auto
+*.go text eol=lf
+*.s text eol=lf
+*.md text eol=lf
+*.ps1 text eol=lf
+go.mod text eol=lf
+go.sum text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Published compressed test vectors must remain byte-for-byte unchanged.
+*.gz binary

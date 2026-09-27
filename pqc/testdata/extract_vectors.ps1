@@ -1,4 +1,48 @@
-param([string]$Source = 'C:\Users\1\go\pkg\mod\github.com\cloudflare\circl@v1.6.3')
+param([string]$Source)
+
+$ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($Source)) {
+ $goCommand = Get-Command go -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+ if ($null -eq $goCommand) {
+  throw 'Go was not found. Install Go or pass -Source <path-to-circl-v1.6.3> to use an existing source directory.'
+ }
+ $moduleCacheOutput = & $goCommand.Source env GOMODCACHE
+ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace(($moduleCacheOutput -join ''))) {
+  throw 'Unable to read GOMODCACHE with go env. Pass -Source <path-to-circl-v1.6.3> explicitly.'
+ }
+ $moduleCachePath = ($moduleCacheOutput -join '').Trim()
+ $Source = Join-Path $moduleCachePath 'github.com/cloudflare/circl@v1.6.3'
+}
+if (-not (Test-Path -LiteralPath $Source -PathType Container)) {
+ throw "CIRCL v1.6.3 source directory does not exist: $Source. Pass -Source <path-to-circl-v1.6.3>. This script does not download source files."
+}
+$Source = (Resolve-Path -LiteralPath $Source).ProviderPath
+
+# Validate the complete input set before replacing any checked-in fixture.
+$requiredInputs = @(
+ 'kem/mlkem/testdata/ML-KEM-keyGen-FIPS203/prompt.json.gz'
+ 'kem/mlkem/testdata/ML-KEM-keyGen-FIPS203/expectedResults.json.gz'
+ 'kem/mlkem/testdata/ML-KEM-encapDecap-FIPS203/prompt.json.gz'
+ 'kem/mlkem/testdata/ML-KEM-encapDecap-FIPS203/expectedResults.json.gz'
+ 'sign/mldsa/testdata/ML-DSA-keyGen-FIPS204/prompt.json.gz'
+ 'sign/mldsa/testdata/ML-DSA-keyGen-FIPS204/expectedResults.json.gz'
+ 'sign/mldsa/testdata/ML-DSA-sigGen-FIPS204/prompt.json.gz'
+ 'sign/mldsa/testdata/ML-DSA-sigGen-FIPS204/expectedResults.json.gz'
+ 'sign/mldsa/testdata/ML-DSA-sigVer-FIPS204/prompt.json.gz'
+ 'sign/mldsa/testdata/ML-DSA-sigVer-FIPS204/expectedResults.json.gz'
+ 'sign/slhdsa/testdata/keyGen_prompt.json.gz'
+ 'sign/slhdsa/testdata/keyGen_results.json.gz'
+ 'sign/slhdsa/testdata/sigGen_prompt.json.gz'
+ 'sign/slhdsa/testdata/sigGen_results.json.gz'
+ 'sign/slhdsa/testdata/verify_prompt.json.gz'
+ 'sign/slhdsa/testdata/verify_results.json.gz'
+)
+foreach ($relativePath in $requiredInputs) {
+ $inputPath = Join-Path $Source $relativePath
+ if (-not (Test-Path -LiteralPath $inputPath -PathType Leaf)) {
+  throw "Required CIRCL v1.6.3 test data is missing: $inputPath. Pass -Source to a complete source directory. No fixture has been changed."
+ }
+}
 # Extract a small reproducible selection of upstream NIST ACVP cases, preserving
 # tcId/tgId and exact hexadecimal values. No expected values are generated locally.
 function Read-GzipJson([string]$path) {

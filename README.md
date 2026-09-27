@@ -6,6 +6,8 @@ Go 链式编码、摘要、加解密、签名与密钥派生工具。需要 **Go
 
 ## 功能与文档
 
+完整说明见 [文档导航](docs/README.md)。根包文件按编码、摘要、对称加密、公钥和算法适配命名；测试与对应功能同包放置，独立算法及其内部参考原语保留各自目录。
+
 | 类别 | 已提供功能 | 详细 API |
 | --- | --- | --- |
 | 摘要 | SHA-2 全系列、SHA-3、SHAKE128/256、Keccak256/512、BLAKE2b/s、RIPEMD160、SM3、旧摘要 | [摘要与 KDF](docs/hash-kdf.md) |
@@ -157,6 +159,24 @@ import legacyrc4 "www.gitlablow.com/wave4y/cryptoutils/rc4"
 RC4 密文仍使用十六进制编码，仅供旧协议或 CTF。新增 `RC4Encrypt`、`RC4Decrypt`、`HexDecodeE` 和 `RandomStringE`，均返回 `(string, error)`；旧 `Rc4Encrypt`、`Rc4Decrypt`、`HexDecode`、`RandomString` 单值包装保留但标为弃用，失败时返回空字符串。`UrlEncode` 修正原来的 `UrlDncode` 拼写，旧名仍为别名。随机字符串已使用 `crypto/rand` 和无偏采样，不再修改全局伪随机数状态。
 
 ## 包结构
+
+```text
+cryptoutils/
+├── *_api.go                 # SM2/SM9/ZUC/PQC 的根包链式适配
+├── base.go / encoding.go    # 链状态、编码与错误处理
+├── hash.go / mac.go         # 摘要与消息认证
+├── aes_gcm.go / aead.go     # 认证加密
+├── block_modes.go / ccm.go  # 分组模式与 CCM
+├── des_legacy.go            # 旧 DES 封装与迁移接口
+├── public_key.go / pem.go   # 传统公钥算法与密钥格式
+├── kdf.go / password.go     # 派生与密码存储
+├── *_test.go                # 按功能分组的测试、示例及互操作向量
+├── sm2/ sm3/ sm4/ sm9/ zuc/ # 国密算法包
+├── pqc/                    # 后量子 API、内部原语、测试向量
+├── internal/idea/          # IDEA 分组原语
+├── utils/ rc4/             # 兼容入口
+└── docs/                   # 功能文档与导航
+```
 
 - 根包：共享链式接口、算法适配、显式参数校验、密码存储、密钥导入导出。
 - `utils`：根包的类型别名和兼容包装，以及按 UTF-8 字节工作的 shell 转义辅助函数。

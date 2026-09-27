@@ -2,10 +2,32 @@
 
 These gzip JSON files contain **selected original inputs and expected outputs**,
 not outputs calculated by cryptoutils. They preserve each test group ID and test
-case ID. `extract_vectors.ps1 -Source <path-to-circl-v1.6.3>` reproduces the files
-from the CIRCL v1.6.3 source distribution. The checked-in fixtures do not need that
-source distribution, network access, PowerShell, or any additional Go module at
-build/test time. CIRCL's applicable license is retained in ../internal/reference/LICENSE.
+case ID. The checked-in fixtures do not need the upstream source distribution,
+network access, PowerShell, or any additional Go module at build/test time.
+CIRCL's applicable license is retained in ../internal/reference/LICENSE.
+
+## Reproducing the samples
+
+Run the helper with PowerShell 7 from the repository root:
+
+```powershell
+pwsh -NoProfile -File ./pqc/testdata/extract_vectors.ps1
+```
+
+By default, the script runs `go env GOMODCACHE` and looks for the existing CIRCL
+v1.6.3 source directory at `github.com/cloudflare/circl@v1.6.3` inside that cache.
+To use an existing source checkout elsewhere, or run without Go installed, pass
+its directory explicitly:
+
+```powershell
+pwsh -NoProfile -File ./pqc/testdata/extract_vectors.ps1 -Source 'D:/sources/circl-v1.6.3'
+```
+
+The script does not download source files or add a module dependency. It checks
+that all required upstream inputs exist before replacing the three sample files,
+and reports a clear error when Go or the source files cannot be found.
+
+## Sample coverage
 
 - ML-KEM: 9 cases, one key-generation, encapsulation, and decapsulation case for
   each of 512/768/1024. CIRCL's testdata README identifies NIST ACVP-Server commit

@@ -1,0 +1,22 @@
+# Go build and test outputs
+/bin/
+/dist/
+/coverage/
+/coverage.out
+/coverage.html
+*.test
+*.test.exe
+*.prof
+
+# Local caches and scratch work
+/.cache/
+/.gocache/
+/.gomodcache/
+/tmp/
+
+# Editor and operating-system files
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini

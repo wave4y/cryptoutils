@@ -2,12 +2,65 @@ package cryptoutils_test
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"testing"
-
 	c "www.gitlablow.com/wave4y/cryptoutils"
 )
+
+func TestHashVectors(t *testing.T) {
+	for _, tc := range []struct {
+		name, want string
+		method     func(*c.CryptoData) *c.CryptoData
+	}{
+		{"md4", "a448017aaf21d8525fc10ae87aa6729d", (*c.CryptoData).Md4},
+		{"md5", "900150983cd24fb0d6963f7d28e17f72", (*c.CryptoData).Md5},
+		{"sha1", "a9993e364706816aba3e25717850c26c9cd0d89d", (*c.CryptoData).Sha1},
+		{"sha256", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", (*c.CryptoData).Sha256},
+		{"sha512", "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f", (*c.CryptoData).Sha512},
+		{"sm3", "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0", (*c.CryptoData).Sm3},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := c.Init("abc").Hash(tc.name).String(); got != tc.want {
+				t.Fatalf("Hash = %q", got)
+			}
+			if got := tc.method(c.Init("abc")).String(); got != tc.want {
+				t.Fatalf("method = %q", got)
+			}
+			if got := c.Init("abc").HashBytes(tc.name).Hex().String(); got != tc.want {
+				t.Fatalf("HashBytes = %q", got)
+			}
+		})
+	}
+	digest := sha256.Sum256([]byte("abc"))
+	if got := c.Init("abc").HashBytes(" SHA-256 ").Base64Encode().String(); got != base64.StdEncoding.EncodeToString(digest[:]) {
+		t.Fatalf("raw digest encoding = %q", got)
+	}
+}
+
+func TestHMACSHA256Vector(t *testing.T) {
+	// RFC 4231, test case 1.
+	key := bytes.Repeat([]byte{0x0b}, 20)
+	data := []byte("Hi There")
+	const want = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7"
+	tag := c.HMACSHA256(data, key)
+	if hex.EncodeToString(tag) != want || c.Init(data).HMACSHA256(key).String() != want {
+		t.Fatalf("HMAC = %x", tag)
+	}
+	if !c.VerifyHMACSHA256(data, key, tag) {
+		t.Fatal("valid tag rejected")
+	}
+	for _, invalid := range [][]byte{nil, tag[:31], append(append([]byte{}, tag...), 0), bytes.Repeat([]byte{0}, 32)} {
+		if c.VerifyHMACSHA256(data, key, invalid) {
+			t.Fatal("invalid tag accepted")
+		}
+	}
+	if c.VerifyHMACSHA256([]byte("altered"), key, tag) || c.VerifyHMACSHA256(data, []byte("wrong"), tag) {
+		t.Fatal("wrong key or message accepted")
+	}
+}
 
 func TestExtendedHashVectors(t *testing.T) {
 	// Fixed abc vectors cross-checked with OpenSSL/Python hashlib.
