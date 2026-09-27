@@ -1,12 +1,25 @@
 package rsactf
 
-import "math/big"
+import (
+	"context"
+	"math/big"
+)
 
 // LowExponent searches c+k*n for an exact e-th power, for 0 <= k <= maxK.
 // It supports 2 <= e <= 64, n > 1, and canonical ciphertexts 0 <= c < n.
 // Every candidate is checked by re-encryption. ErrNoResult means that no
 // canonical plaintext was found within this inclusive search budget.
 func LowExponent(n, e, c *big.Int, maxK uint64) (*big.Int, error) {
+	return LowExponentContext(context.Background(), n, e, c, maxK)
+}
+
+// LowExponentContext is LowExponent with cooperative cancellation. It checks
+// ctx between candidates and inside root iteration; one math/big operation
+// cannot be interrupted. A nil context is invalid; cancellation returns ctx.Err().
+func LowExponentContext(ctx context.Context, n, e, c *big.Int, maxK uint64) (*big.Int, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
 	if !validModulus(n) || !validExponent(e) || !validResidue(c, n) ||
 		!e.IsUint64() || e.Uint64() < 2 || e.Uint64() > 64 {
 		return nil, ErrInvalidInput
@@ -14,11 +27,15 @@ func LowExponent(n, e, c *big.Int, maxK uint64) (*big.Int, error) {
 	degree := uint(e.Uint64())
 	x := new(big.Int).Set(c)
 	for k := uint64(0); ; k++ {
-		m, exact, err := IntegerRoot(x, degree)
+		m, exact, err := IntegerRootContext(ctx, x, degree)
 		if err != nil {
 			return nil, err
 		}
-		if exact && verifiedPlaintext(m, n, e, c) {
+		verified := exact && verifiedPlaintext(m, n, e, c)
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		if verified {
 			return m, nil
 		}
 		// Stop before incrementing, including when maxK is MaxUint64.
@@ -153,6 +170,16 @@ func SharedFactor(n1, n2 *big.Int) (*big.Int, error) {
 // a=ceil(sqrt(n)); maxSteps=0 performs no search. Even n > 2 immediately
 // returns 2 regardless of the budget. ErrNoResult does not prove primality.
 func Fermat(n *big.Int, maxSteps uint64) (*big.Int, error) {
+	return FermatContext(context.Background(), n, maxSteps)
+}
+
+// FermatContext is Fermat with cooperative cancellation between square
+// candidates. It cannot interrupt an individual math/big operation.
+// A nil context is invalid; cancellation returns ctx.Err().
+func FermatContext(ctx context.Context, n *big.Int, maxSteps uint64) (*big.Int, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
 	if !validModulus(n) {
 		return nil, ErrInvalidInput
 	}
@@ -160,6 +187,9 @@ func Fermat(n *big.Int, maxSteps uint64) (*big.Int, error) {
 		if n.Cmp(big.NewInt(2)) > 0 {
 			return big.NewInt(2), nil
 		}
+		return nil, ErrNoResult
+	}
+	if maxSteps == 0 {
 		return nil, ErrNoResult
 	}
 	a := new(big.Int).Sqrt(n)
@@ -170,7 +200,13 @@ func Fermat(n *big.Int, maxSteps uint64) (*big.Int, error) {
 	}
 	one := big.NewInt(1)
 	for step := uint64(0); step < maxSteps; step++ {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		b := new(big.Int).Sqrt(bSquared)
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if new(big.Int).Mul(b, b).Cmp(bSquared) == 0 {
 			p := new(big.Int).Sub(a, b)
 			if p.Cmp(one) > 0 && p.Cmp(n) < 0 {
@@ -230,8 +266,22 @@ func FactorFromPhi(n, phi *big.Int) (*big.Int, error) {
 // ErrNoResult and does not prove that the leak is invalid. Partial-bit
 // leaks are not supported. A returned factor need not itself be prime.
 func FactorFromCRTExponent(n, e, dp *big.Int, attempts uint64) (*big.Int, error) {
+	return FactorFromCRTExponentContext(context.Background(), n, e, dp, attempts)
+}
+
+// FactorFromCRTExponentContext is FactorFromCRTExponent with cooperative
+// cancellation between bases, modular exponentiations, and repeated squares.
+// It cannot interrupt an individual math/big operation. A nil context is
+// invalid; cancellation returns ctx.Err().
+func FactorFromCRTExponentContext(ctx context.Context, n, e, dp *big.Int, attempts uint64) (*big.Int, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
 	if !validModulus(n) || !validExponent(e) || !validExponent(dp) {
 		return nil, ErrInvalidInput
+	}
+	if attempts == 0 {
+		return nil, ErrNoResult
 	}
 	one := big.NewInt(1)
 	k := new(big.Int).Sub(new(big.Int).Mul(e, dp), one)
@@ -242,11 +292,17 @@ func FactorFromCRTExponent(n, e, dp *big.Int, attempts uint64) (*big.Int, error)
 	oddPart := new(big.Int).Rsh(k, powersOfTwo)
 	base := big.NewInt(2)
 	for attempt := uint64(0); attempt < attempts && base.Cmp(n) < 0; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		p := new(big.Int).GCD(nil, nil, base, n)
 		if p.Cmp(one) > 0 && p.Cmp(n) < 0 {
 			return p, nil
 		}
 		power := new(big.Int).Exp(base, k, n)
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		p.GCD(nil, nil, new(big.Int).Sub(power, one), n)
 		if p.Cmp(one) > 0 && p.Cmp(n) < 0 {
 			return p, nil
@@ -254,6 +310,9 @@ func FactorFromCRTExponent(n, e, dp *big.Int, attempts uint64) (*big.Int, error)
 		if p.Cmp(n) == 0 && powersOfTwo > 0 {
 			power.Exp(base, oddPart, n)
 			for step := uint(0); step < powersOfTwo; step++ {
+				if err := ctx.Err(); err != nil {
+					return nil, err
+				}
 				p.GCD(nil, nil, new(big.Int).Sub(power, one), n)
 				if p.Cmp(one) > 0 && p.Cmp(n) < 0 {
 					return p, nil

@@ -120,6 +120,24 @@ CRT 泄露的重复平方回退可处理直接 GCD 总得到 n 的部分情形�
 平方根使用 `big.Int.Sqrt`，更高次数使用整数牛顿迭代，并以整数幂判断是否精确，
 不依赖浮点精度。
 
+### 搜索取消
+
+`RSAIntegerRootContext`、`RSALowExponentContext`、`RSAFermatContext` 和
+`RSAFactorFromCRTExponentContext` 在原参数前增加 `context.Context`，支持取消和截止时间。
+子包同样使用 `IntegerRootContext` 等名称；原接口调用后台 context，签名和预算语义不变。
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+defer cancel()
+factor, err := cryptoutils.RSAFermatContext(ctx, n, 1_000_000)
+```
+
+取消返回 `context.Canceled` 或 `context.DeadlineExceeded`，不返回部分结果；nil context
+返回 `ErrInvalidRSACTFInput`。检查点位于搜索循环、整数根迭代及 dp 恢复的重复平方之间。
+这是协作式取消，不能中断单次 `math/big` 运算，也不会启动取消后仍在后台计算的 goroutine。
+需要严格的进程级时间或内存上限时，调用方应使用独立进程。
+`ErrRSACTFNoResult` 继续表示条件不满足或预算内未找到结果，与取消错误可以区分。
+
 ## 与标准 RSA 接口对接
 
 恢复出合法的 n/e/d/p/q 后，可以构造 `crypto/rsa.PrivateKey`，再交给根包的

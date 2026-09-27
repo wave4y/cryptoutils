@@ -1,11 +1,24 @@
 package rsactf
 
-import "math/big"
+import (
+	"context"
+	"math/big"
+)
 
 // IntegerRoot returns floor(x^(1/degree)) and whether the root is exact.
 // It accepts nonnegative x and degree >= 1, and never modifies x. Large
 // degrees are handled without constructing an exponentially large power.
 func IntegerRoot(x *big.Int, degree uint) (*big.Int, bool, error) {
+	return IntegerRootContext(context.Background(), x, degree)
+}
+
+// IntegerRootContext is IntegerRoot with cooperative cancellation between
+// integer operations. It cannot interrupt an individual math/big operation.
+// A nil context is invalid; cancellation returns ctx.Err().
+func IntegerRootContext(ctx context.Context, x *big.Int, degree uint) (*big.Int, bool, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, false, err
+	}
 	if x == nil || x.Sign() < 0 || degree == 0 {
 		return nil, false, ErrInvalidInput
 	}
@@ -17,6 +30,9 @@ func IntegerRoot(x *big.Int, degree uint) (*big.Int, bool, error) {
 	}
 	if degree == 2 {
 		root := new(big.Int).Sqrt(x)
+		if err := ctx.Err(); err != nil {
+			return nil, false, err
+		}
 		return root, new(big.Int).Mul(root, root).Cmp(x) == 0, nil
 	}
 
@@ -28,6 +44,9 @@ func IntegerRoot(x *big.Int, degree uint) (*big.Int, bool, error) {
 	previousExponent := new(big.Int).Sub(exponent, big.NewInt(1))
 	power, quotient, next := new(big.Int), new(big.Int), new(big.Int)
 	for {
+		if err := ctx.Err(); err != nil {
+			return nil, false, err
+		}
 		// Integer Newton step: ((degree-1)*root + x/root^(degree-1))/degree.
 		// Starting above the real root, this strictly decreases until the
 		// floor root, never undershooting it. At the floor root it may
@@ -38,6 +57,9 @@ func IntegerRoot(x *big.Int, degree uint) (*big.Int, bool, error) {
 		next.Add(next, quotient)
 		next.Quo(next, exponent)
 		if next.Cmp(root) >= 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, false, err
+			}
 			return root, power.Mul(power, root).Cmp(x) == 0, nil
 		}
 		root, next = next, root
