@@ -4,18 +4,7 @@
 // All functions preserve their input big.Int values.
 package rsactf
 
-import (
-	"errors"
-	"math/big"
-)
-
-var (
-	// ErrInvalidInput indicates missing parameters or violated input conditions.
-	ErrInvalidInput = errors.New("cryptoutils/rsactf: invalid input")
-	// ErrNoResult indicates no result under the method's conditions or search budget.
-	// It does not prove that a modulus is secure or a problem has no solution.
-	ErrNoResult = errors.New("cryptoutils/rsactf: no result")
-)
+import "math/big"
 
 func validModulus(n *big.Int) bool { return n != nil && n.Cmp(big.NewInt(1)) > 0 }
 func validResidue(x, n *big.Int) bool {

@@ -53,7 +53,7 @@ func TestRSAFactorizationErrorsAndContexts(t *testing.T) {
 		func() (*big.Int, error) { return c.RSAPollardRho(big.NewInt(8051), 0, 8) },
 		func() (*big.Int, error) { return c.RSAPollardRho(big.NewInt(8051), 10000, 0) },
 	} {
-		if factor, err := call(); factor != nil || err != c.ErrRSACTFNoResult {
+		if factor, err := call(); factor != nil || !errors.Is(err, c.ErrRSACTFNoResult) {
 			t.Fatalf("zero budget: %v, %v", factor, err)
 		}
 	}

@@ -27,7 +27,7 @@ func PrivateExponent(e, totient *big.Int) (*big.Int, error) {
 	}
 	d := new(big.Int).ModInverse(e, totient)
 	if d == nil {
-		return nil, ErrNoResult
+		return nil, noResult("PrivateExponent", ReasonNotInvertible)
 	}
 	return d, nil
 }
@@ -51,7 +51,8 @@ func CompletePrivateParameters(p, q, e *big.Int) (*PrivateParameters, error) {
 	lambda := new(big.Int).Quo(phi, gcd)
 	d, err := PrivateExponent(e, lambda)
 	if err != nil {
-		return nil, err
+		// Validated e and lambda leave noninvertibility as the only failure.
+		return nil, noResult("CompletePrivateParameters", ReasonNotInvertible)
 	}
 	return &PrivateParameters{
 		PublicParameters: PublicParameters{

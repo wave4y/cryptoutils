@@ -118,7 +118,7 @@ CRT 泄露的重复平方回退可处理直接 GCD 总得到 n 的部分情形�
 不引入无限搜索或枚举 k。广播接口要求所有观测对应同一明文。
 
 所有函数不修改传入的 `big.Int`。输入不符合条件时返回 `ErrInvalidRSACTFInput`，
-攻击条件不成立或在预算内未找到结果时返回 `ErrRSACTFNoResult`，可用 `errors.Is` 判断。
+攻击条件不成立或在预算内未找到结果时返回包装 `ErrRSACTFNoResult` 的错误，可用 `errors.Is` 判断。
 `RSAIntegerRoot` 的非精确结果通过 bool 表达，不作为错误。
 平方根使用 `big.Int.Sqrt`，更高次数使用整数牛顿迭代，并以整数幂判断是否精确，
 不依赖浮点精度。
@@ -147,6 +147,47 @@ p−1 使用固定大小分段筛，避免按 bound 分配巨型数组；这不�
 
 Wiener 仅搜索经典收敛项，没有半收敛项/Boneh–Durfee 扩展；p−1 尚无第二阶段。
 这些有界算法失败不代表模数是素数或密钥安全。
+
+### 无结果的具体原因
+
+所有匹配 `ErrRSACTFNoResult` 的返回错误现在都是 `*RSACTFNoResultError`，
+包含 `Op` 和 `Reason`。`Op` 使用子包函数名，例如 `Fermat`、`PrivateExponent`，
+不带根包的 RSA 前缀或 `Context` 后缀。根包类型及原因常量均为 `rsactf` 的别名，
+两个入口和有无 Context 的版本采用相同分类。
+
+| 根包原因常量 | 含义 |
+| --- | --- |
+| `RSACTFReasonBudgetExhausted` | 调用方提供的搜索预算已耗尽；增加预算可能有帮助，但不保证成功。 |
+| `RSACTFReasonSearchExhausted` | 当前方法的候选序列已经遍历结束；只增加迭代预算不会产生新候选。不是对其他方法或参数的无解证明。 |
+| `RSACTFReasonConditionsNotMet` | 当前恢复方法所需的数学条件不满足，或候选未通过验证；不是输入格式错误，也不表示一般问题无解。 |
+| `RSACTFReasonNotInvertible` | 所需模逆不存在；出现在私钥指数/参数补全，以及共模因子回退中两个指数均不可逆的情况。 |
+
+子包类型为 `NoResultError`、`NoResultReason`，常量为 `ReasonBudgetExhausted` 等。
+原因值是稳定字符串：`budget_exhausted`、`search_exhausted`、
+`conditions_not_met`、`not_invertible`。程序应判断 `Reason`，不要解析错误文本。
+
+```go
+_, err := cryptoutils.RSAFermat(big.NewInt(101), 1)
+if errors.Is(err, cryptoutils.ErrRSACTFNoResult) {
+    var detail *cryptoutils.RSACTFNoResultError
+    if errors.As(err, &detail) {
+        fmt.Printf("%s: %s\n", detail.Op, detail.Reason)
+        // Fermat: budget_exhausted
+    }
+}
+```
+
+同一个 `n=101`，Fermat 的预算为 41 时刚好检查完从 a=11 到 a=51 的全部候选，
+返回 `search_exhausted`。Wiener 遍历完连分数、低指数搜索越过规范明文范围，
+以及 dp 恢复和 p−1 遍历完底数 `[2,n)`，也使用该原因；若遍历结束恰好与预算
+边界重合，优先报告已观察到的候选结束。p−1 的含义仅针对当前平滑界。
+Rho 的步数或重启次数用尽都归为 `budget_exhausted`，不推断其余游走是否会成功。
+`conditions_not_met` 用于广播、共模、共享因子、φ 恢复和不满足 `e*dp>1` 的 dp 恢复。
+
+原有 `errors.Is(err, ErrRSACTFNoResult)` 判断仍然有效，包括外层用 `%w` 再包装的错误。
+**直接使用 `err == ErrRSACTFNoResult` 的代码需要改为 `errors.Is`**；错误文本也增加了
+操作及原因，不能依赖旧文本完全相等。成功返回值、搜索预算和错误大类不变，
+输入错误及取消/超时仍沿用原有错误，不包装为无结果错误。
 
 ### 搜索取消
 

@@ -10,8 +10,10 @@ import (
 // walks, including recovery after an unsuccessful GCD batch. attempts limits
 // the number of walks. Either budget being zero performs no search. With
 // positive budgets, even n > 2 immediately returns 2. The returned factor may
-// be composite. ErrNoResult means the budgets were exhausted, not that n is
-// prime. The input is preserved and the returned factor does not alias it.
+// be composite. Its NoResultError reports ReasonBudgetExhausted when either
+// budget stops the search, which does not prove that n is prime. With positive
+// budgets n=2 reports ReasonSearchExhausted because it has no proper factor.
+// The input is preserved and the returned factor does not alias it.
 func PollardRho(n *big.Int, maxSteps, attempts uint64) (*big.Int, error) {
 	return PollardRhoContext(context.Background(), n, maxSteps, attempts)
 }
@@ -27,14 +29,14 @@ func PollardRhoContext(ctx context.Context, n *big.Int, maxSteps, attempts uint6
 		return nil, ErrInvalidInput
 	}
 	if maxSteps == 0 || attempts == 0 {
-		return nil, ErrNoResult
+		return nil, noResult("PollardRho", ReasonBudgetExhausted)
 	}
 	one, two := big.NewInt(1), big.NewInt(2)
 	if n.Bit(0) == 0 {
 		if n.Cmp(two) > 0 {
 			return two, nil
 		}
-		return nil, ErrNoResult
+		return nil, noResult("PollardRho", ReasonSearchExhausted)
 	}
 
 	remaining := maxSteps
@@ -46,7 +48,7 @@ func PollardRhoContext(ctx context.Context, n *big.Int, maxSteps, attempts uint6
 			return err
 		}
 		if remaining == 0 {
-			return ErrNoResult
+			return noResult("PollardRho", ReasonBudgetExhausted)
 		}
 		value.Mul(value, value)
 		value.Add(value, c)
@@ -142,5 +144,5 @@ func PollardRhoContext(ctx context.Context, n *big.Int, maxSteps, attempts uint6
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return nil, ErrNoResult
+	return nil, noResult("PollardRho", ReasonBudgetExhausted)
 }

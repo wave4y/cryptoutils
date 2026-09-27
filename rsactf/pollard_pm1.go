@@ -12,6 +12,9 @@ import (
 // no search. A factor need not be prime. ErrNoResult means that the chosen
 // bases and bound did not find a factor, not that n is prime. Stage 2 is not
 // implemented. Inputs are never modified.
+// Its NoResultError reports ReasonSearchExhausted after all bases in [2,n)
+// were tried at the supplied bound, or ReasonBudgetExhausted when the attempt
+// limit stopped the search. Zero attempts always reports ReasonBudgetExhausted.
 func PollardPMinusOne(n *big.Int, bound, attempts uint64) (*big.Int, error) {
 	return PollardPMinusOneContext(context.Background(), n, bound, attempts)
 }
@@ -27,6 +30,9 @@ func PollardPMinusOneContext(ctx context.Context, n *big.Int, bound, attempts ui
 	}
 	if !validModulus(n) || bound < 2 {
 		return nil, ErrInvalidInput
+	}
+	if attempts == 0 {
+		return nil, noResult("PollardPMinusOne", ReasonBudgetExhausted)
 	}
 	one, base := big.NewInt(1), big.NewInt(2)
 	gcd, delta, exponent := new(big.Int), new(big.Int), new(big.Int)
@@ -95,7 +101,10 @@ func PollardPMinusOneContext(ctx context.Context, n *big.Int, bound, attempts ui
 		}
 		base.Add(base, one)
 	}
-	return nil, ErrNoResult
+	if base.Cmp(n) >= 0 {
+		return nil, noResult("PollardPMinusOne", ReasonSearchExhausted)
+	}
+	return nil, noResult("PollardPMinusOne", ReasonBudgetExhausted)
 }
 
 // visitPollardPrimes visits primes in ascending order, stopping when visit

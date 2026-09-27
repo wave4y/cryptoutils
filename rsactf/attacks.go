@@ -38,9 +38,12 @@ func LowExponentContext(ctx context.Context, n, e, c *big.Int, maxK uint64) (*bi
 		if verified {
 			return m, nil
 		}
+		if m.Cmp(n) >= 0 {
+			return nil, noResult("LowExponent", ReasonSearchExhausted)
+		}
 		// Stop before incrementing, including when maxK is MaxUint64.
-		if k == maxK || m.Cmp(n) >= 0 {
-			return nil, ErrNoResult
+		if k == maxK {
+			return nil, noResult("LowExponent", ReasonBudgetExhausted)
 		}
 		x.Add(x, n)
 	}
@@ -64,12 +67,12 @@ func Broadcast(moduli, ciphertexts []*big.Int, e uint) (*big.Int, error) {
 		return nil, err
 	}
 	if !exact {
-		return nil, ErrNoResult
+		return nil, noResult("Broadcast", ReasonConditionsNotMet)
 	}
 	exponent := new(big.Int).SetUint64(uint64(e))
 	for i, modulus := range moduli {
 		if !verifiedPlaintext(m, modulus, exponent, ciphertexts[i]) {
-			return nil, ErrNoResult
+			return nil, noResult("Broadcast", ReasonConditionsNotMet)
 		}
 	}
 	return m, nil
@@ -131,24 +134,29 @@ func CommonModulus(n, e1, c1, e2, c2 *big.Int) (*big.Int, error) {
 		}
 		q := new(big.Int).Quo(n, p)
 		if p.Cmp(q) == 0 || !p.ProbablyPrime(32) || !q.ProbablyPrime(32) {
-			return nil, ErrNoResult
+			return nil, noResult("CommonModulus", ReasonConditionsNotMet)
 		}
 		pm1, qm1 := new(big.Int).Sub(p, one), new(big.Int).Sub(q, one)
 		lambda := new(big.Int).GCD(nil, nil, pm1, qm1)
 		lambda.Quo(pm1, lambda)
 		lambda.Mul(lambda, qm1)
+		invertible := false
 		for _, pair := range [][2]*big.Int{{e1, c1}, {e2, c2}} {
 			d := new(big.Int).ModInverse(pair[0], lambda)
 			if d != nil {
+				invertible = true
 				m := new(big.Int).Exp(pair[1], d, n)
 				if verify(m) {
 					return m, nil
 				}
 			}
 		}
-		return nil, ErrNoResult
+		if !invertible {
+			return nil, noResult("CommonModulus", ReasonNotInvertible)
+		}
+		return nil, noResult("CommonModulus", ReasonConditionsNotMet)
 	}
-	return nil, ErrNoResult
+	return nil, noResult("CommonModulus", ReasonConditionsNotMet)
 }
 
 // SharedFactor returns gcd(n1,n2) only when it is a proper nontrivial factor
@@ -160,7 +168,7 @@ func SharedFactor(n1, n2 *big.Int) (*big.Int, error) {
 	}
 	p := new(big.Int).GCD(nil, nil, n1, n2)
 	if p.Cmp(big.NewInt(1)) <= 0 || p.Cmp(n1) >= 0 || p.Cmp(n2) >= 0 {
-		return nil, ErrNoResult
+		return nil, noResult("SharedFactor", ReasonConditionsNotMet)
 	}
 	return p, nil
 }
@@ -187,10 +195,10 @@ func FermatContext(ctx context.Context, n *big.Int, maxSteps uint64) (*big.Int, 
 		if n.Cmp(big.NewInt(2)) > 0 {
 			return big.NewInt(2), nil
 		}
-		return nil, ErrNoResult
+		return nil, noResult("Fermat", ReasonSearchExhausted)
 	}
 	if maxSteps == 0 {
-		return nil, ErrNoResult
+		return nil, noResult("Fermat", ReasonBudgetExhausted)
 	}
 	a := new(big.Int).Sqrt(n)
 	bSquared := new(big.Int).Sub(new(big.Int).Mul(a, a), n)
@@ -213,14 +221,14 @@ func FermatContext(ctx context.Context, n *big.Int, maxSteps uint64) (*big.Int, 
 				return p, nil
 			}
 			// Reaching 1*n exhausts the possible nontrivial factorizations.
-			return nil, ErrNoResult
+			return nil, noResult("Fermat", ReasonSearchExhausted)
 		}
 		// (a+1)^2-n = (a^2-n)+2*a+1.
 		bSquared.Add(bSquared, new(big.Int).Lsh(a, 1))
 		bSquared.Add(bSquared, one)
 		a.Add(a, one)
 	}
-	return nil, ErrNoResult
+	return nil, noResult("Fermat", ReasonBudgetExhausted)
 }
 
 // FactorFromPhi recovers a nontrivial factor using phi=(p-1)*(q-1) and
@@ -235,23 +243,23 @@ func FactorFromPhi(n, phi *big.Int) (*big.Int, error) {
 	sum := new(big.Int).Add(new(big.Int).Sub(n, phi), big.NewInt(1))
 	discriminant := new(big.Int).Sub(new(big.Int).Mul(sum, sum), new(big.Int).Lsh(n, 2))
 	if discriminant.Sign() < 0 {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromPhi", ReasonConditionsNotMet)
 	}
 	root := new(big.Int).Sqrt(discriminant)
 	if new(big.Int).Mul(root, root).Cmp(discriminant) != 0 {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromPhi", ReasonConditionsNotMet)
 	}
 	twiceP := new(big.Int).Sub(sum, root)
 	if twiceP.Bit(0) != 0 {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromPhi", ReasonConditionsNotMet)
 	}
 	p := new(big.Int).Rsh(twiceP, 1)
 	if p.Cmp(big.NewInt(1)) <= 0 || p.Cmp(n) >= 0 || new(big.Int).Mod(n, p).Sign() != 0 {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromPhi", ReasonConditionsNotMet)
 	}
 	q := new(big.Int).Quo(n, p)
 	if p.Cmp(q) == 0 || !p.ProbablyPrime(32) || !q.ProbablyPrime(32) {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromPhi", ReasonConditionsNotMet)
 	}
 	return p, nil
 }
@@ -281,12 +289,12 @@ func FactorFromCRTExponentContext(ctx context.Context, n, e, dp *big.Int, attemp
 		return nil, ErrInvalidInput
 	}
 	if attempts == 0 {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromCRTExponent", ReasonBudgetExhausted)
 	}
 	one := big.NewInt(1)
 	k := new(big.Int).Sub(new(big.Int).Mul(e, dp), one)
 	if k.Sign() <= 0 {
-		return nil, ErrNoResult
+		return nil, noResult("FactorFromCRTExponent", ReasonConditionsNotMet)
 	}
 	powersOfTwo := k.TrailingZeroBits()
 	oddPart := new(big.Int).Rsh(k, powersOfTwo)
@@ -328,7 +336,10 @@ func FactorFromCRTExponentContext(ctx context.Context, n, e, dp *big.Int, attemp
 		}
 		base.Add(base, one)
 	}
-	return nil, ErrNoResult
+	if base.Cmp(n) >= 0 {
+		return nil, noResult("FactorFromCRTExponent", ReasonSearchExhausted)
+	}
+	return nil, noResult("FactorFromCRTExponent", ReasonBudgetExhausted)
 }
 
 func verifiedPlaintext(m, n, e, c *big.Int) bool {

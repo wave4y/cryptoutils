@@ -12,6 +12,8 @@ import (
 // initial k=0 term when e<n. Zero performs no search. This is the classical
 // convergent search, without semiconvergents or extensions; ErrNoResult does
 // not prove that the key has no small private exponent.
+// Its NoResultError reports ReasonSearchExhausted when all convergents were
+// examined, or ReasonBudgetExhausted when the term limit stopped the search.
 func Wiener(n, e *big.Int, maxConvergents uint64) (*big.Int, error) {
 	return WienerContext(context.Background(), n, e, maxConvergents)
 }
@@ -28,7 +30,7 @@ func WienerContext(ctx context.Context, n, e *big.Int, maxConvergents uint64) (*
 		return nil, ErrInvalidInput
 	}
 	if maxConvergents == 0 {
-		return nil, ErrNoResult
+		return nil, noResult("Wiener", ReasonBudgetExhausted)
 	}
 
 	numerator, denominator := new(big.Int).Set(e), new(big.Int).Set(n)
@@ -71,5 +73,8 @@ func WienerContext(ctx context.Context, n, e *big.Int, maxConvergents uint64) (*
 			return factor, nil
 		}
 	}
-	return nil, ErrNoResult
+	if denominator.Sign() == 0 {
+		return nil, noResult("Wiener", ReasonSearchExhausted)
+	}
+	return nil, noResult("Wiener", ReasonBudgetExhausted)
 }

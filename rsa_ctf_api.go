@@ -10,6 +10,7 @@ var (
 	// ErrInvalidRSACTFInput indicates invalid inputs to the RSA math/CTF APIs.
 	ErrInvalidRSACTFInput = rsactf.ErrInvalidInput
 	// ErrRSACTFNoResult means the attack found no result under its conditions or budget.
+	// Match with errors.Is; inspect *RSACTFNoResultError with errors.As for the reason.
 	ErrRSACTFNoResult = rsactf.ErrNoResult
 )
 

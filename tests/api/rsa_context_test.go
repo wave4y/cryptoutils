@@ -142,7 +142,7 @@ func TestRSAContextBudgetSemantics(t *testing.T) {
 			return c.RSAFactorFromCRTExponentContext(ctx, big.NewInt(3233), big.NewInt(17), big.NewInt(53), 0)
 		},
 	} {
-		if result, err := call(); result != nil || err != c.ErrRSACTFNoResult {
+		if result, err := call(); result != nil || !errors.Is(err, c.ErrRSACTFNoResult) {
 			t.Fatalf("zero budget: %v, %v", result, err)
 		}
 	}
