@@ -1,4 +1,4 @@
-package cryptoutils
+package symmetric
 
 import (
 	"crypto/cipher"
@@ -53,6 +53,7 @@ func OpenCCM(algorithm string, data, key, nonce, aad []byte, tagSize int) ([]byt
 	}
 	return out, nil
 }
+
 func ccmCipher(algorithm string, key, nonce []byte, tagSize, n int) (cipher.Block, error) {
 	if len(nonce) < 7 || len(nonce) > 13 || tagSize < 4 || tagSize > 16 || tagSize%2 != 0 {
 		return nil, fmt.Errorf("cryptoutils: invalid CCM nonce or tag size")
@@ -70,12 +71,14 @@ func ccmCipher(algorithm string, key, nonce []byte, tagSize, n int) (cipher.Bloc
 	}
 	return b, nil
 }
+
 func putCCMLength(dst []byte, n uint64) {
 	for i := len(dst) - 1; i >= 0; i-- {
 		dst[i] = byte(n)
 		n >>= 8
 	}
 }
+
 func ccmMAC(b cipher.Block, data, nonce, aad []byte, tagSize int) [16]byte {
 	var state, block [16]byte
 	l := 15 - len(nonce)
@@ -127,6 +130,7 @@ func ccmMAC(b cipher.Block, data, nonce, aad []byte, tagSize int) [16]byte {
 	absorb(data)
 	return state
 }
+
 func ccmCTR(b cipher.Block, dst, src, nonce []byte, counter uint64) {
 	var block, stream [16]byte
 	l := 15 - len(nonce)

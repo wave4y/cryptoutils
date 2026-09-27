@@ -1,4 +1,4 @@
-package cryptoutils
+package symmetric
 
 import (
 	"crypto/aes"
@@ -49,32 +49,4 @@ func newAESGCM(key []byte) (cipher.AEAD, error) {
 		return nil, fmt.Errorf("cryptoutils: AES-GCM key: %w", err)
 	}
 	return cipher.NewGCM(block)
-}
-
-// AESGCMEncrypt replaces the current data with a nonce-prefixed AES-GCM
-// envelope. Read Err or Result to check whether encryption succeeded.
-func (p *CryptoData) AESGCMEncrypt(aad []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	data, err := EncryptAESGCM(p.data, p.key, aad)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = data
-	return p
-}
-
-// AESGCMDecrypt authenticates and decrypts the current AES-GCM envelope.
-// Read Err or Result to check whether decryption succeeded.
-func (p *CryptoData) AESGCMDecrypt(aad []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	data, err := DecryptAESGCM(p.data, p.key, aad)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = data
-	return p
 }

@@ -1,4 +1,4 @@
-package cryptoutils
+package symmetric
 
 import (
 	"crypto/aes"
@@ -67,6 +67,7 @@ func EncryptBlockRaw(algorithm, mode string, data, key, iv []byte) ([]byte, erro
 func DecryptBlockRaw(algorithm, mode string, data, key, iv []byte) ([]byte, error) {
 	return cryptBlockMode(algorithm, mode, data, key, iv, true, false)
 }
+
 func cryptBlockMode(algorithm, mode string, data, key, iv []byte, decrypt, pad bool) ([]byte, error) {
 	b, err := NewBlockCipher(algorithm, key)
 	if err != nil {
@@ -130,32 +131,6 @@ func cryptBlockMode(algorithm, mode string, data, key, iv []byte, decrypt, pad b
 	return out, nil
 }
 
-// BlockEncrypt uses SetKey and emits raw ciphertext using EncryptBlock's format.
-func (p *CryptoData) BlockEncrypt(algorithm, mode string, iv []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := EncryptBlock(algorithm, mode, p.data, p.key, iv)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
-}
-
-// BlockDecrypt uses SetKey and reverses BlockEncrypt.
-func (p *CryptoData) BlockDecrypt(algorithm, mode string, iv []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := DecryptBlock(algorithm, mode, p.data, p.key, iv)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
-}
-
 // EncryptXTS encrypts whole 16-byte blocks in a disk sector, without authentication
 // or ciphertext stealing. The key contains two equal-length cipher keys.
 func EncryptXTS(algorithm string, data, key []byte, sector uint64) ([]byte, error) {
@@ -166,6 +141,7 @@ func EncryptXTS(algorithm string, data, key []byte, sector uint64) ([]byte, erro
 func DecryptXTS(algorithm string, data, key []byte, sector uint64) ([]byte, error) {
 	return cryptXTS(algorithm, data, key, sector, true)
 }
+
 func cryptXTS(algorithm string, data, key []byte, sector uint64, decrypt bool) ([]byte, error) {
 	if len(data) == 0 || len(data)%16 != 0 || len(data) >= 1<<24 {
 		return nil, fmt.Errorf("cryptoutils: XTS requires a nonempty whole-block sector shorter than 2^24 bytes")
@@ -201,26 +177,4 @@ func cryptXTS(algorithm string, data, key []byte, sector uint64, decrypt bool) (
 		c.Encrypt(out, data, sector)
 	}
 	return out, nil
-}
-func (p *CryptoData) XTSEncrypt(algorithm string, sector uint64) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := EncryptXTS(algorithm, p.data, p.key, sector)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
-}
-func (p *CryptoData) XTSDecrypt(algorithm string, sector uint64) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := DecryptXTS(algorithm, p.data, p.key, sector)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
 }

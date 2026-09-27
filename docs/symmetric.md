@@ -53,7 +53,7 @@ AES 和 SM4 另有 `AESCBCEncrypt(iv)`、`SM4CTREncrypt(iv)` 等便捷方法：�
 
 `EncryptXTS(algorithm, data, key, sector)` / `DecryptXTS(...)` 用于整分组扇区，algorithm 可用 `aes`、`sm4` 或 `twofish`。key 是两个长度相同、内容不同的分组密钥拼接。数据必须非空、16 字节对齐且小于 2^24 字节；sector 是 uint64 小端扇区编号。链式为 `XTSEncrypt(algorithm, sector)` / `XTSDecrypt(...)`，AES 另有 `AESXTSEncrypt(sector)` / `AESXTSDecrypt(sector)`。当前不实现 ciphertext stealing；XTS 不提供认证。
 
-DES、3DES、Blowfish、TEA、XTEA、CAST5、IDEA 主要用于历史协议兼容和研究；IDEA 为本地可移植实现，未实现恒定时间运算。原有 `DesCBCEncrypt()` 是带随机 IV 和 HMAC 的本库封装，和这里的裸 `BlockEncrypt("des", "cbc", iv)` 格式不同，见主 README 的迁移说明。
+DES、3DES、Blowfish、TEA、XTEA、CAST5、IDEA 主要用于历史协议兼容和研究；IDEA 为本地可移植实现，未实现恒定时间运算。原有 `DesCBCEncrypt()` 是带随机 IV 和 HMAC 的本库封装，和这里的裸 `BlockEncrypt("des", "cbc", iv)` 格式不同，见 [DES 迁移说明](compatibility.md#des-密文格式)。
 
 ## CMAC、Poly1305
 

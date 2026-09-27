@@ -1,4 +1,4 @@
-package cryptoutils
+package symmetric
 
 import (
 	"crypto/subtle"

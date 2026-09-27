@@ -1,4 +1,4 @@
-package cryptoutils
+package symmetric
 
 import (
 	"crypto/cipher"
@@ -58,6 +58,7 @@ func DecryptAEAD(algorithm string, data, key, aad []byte) ([]byte, error) {
 	}
 	return out, nil
 }
+
 func newNamedAEAD(name string, key []byte) (cipher.AEAD, error) {
 	switch name {
 	case "aes-gcm", "sm4-gcm":
@@ -73,40 +74,4 @@ func newNamedAEAD(name string, key []byte) (cipher.AEAD, error) {
 	default:
 		return nil, fmt.Errorf("cryptoutils: unsupported AEAD %q", name)
 	}
-}
-func (p *CryptoData) AEADEncrypt(algorithm string, aad []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := EncryptAEAD(algorithm, p.data, p.key, aad)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
-}
-func (p *CryptoData) AEADDecrypt(algorithm string, aad []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := DecryptAEAD(algorithm, p.data, p.key, aad)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
-}
-func (p *CryptoData) SM4GCMEncrypt(aad []byte) *CryptoData { return p.AEADEncrypt("sm4-gcm", aad) }
-func (p *CryptoData) SM4GCMDecrypt(aad []byte) *CryptoData { return p.AEADDecrypt("sm4-gcm", aad) }
-func (p *CryptoData) ChaCha20Poly1305Encrypt(aad []byte) *CryptoData {
-	return p.AEADEncrypt("chacha20-poly1305", aad)
-}
-func (p *CryptoData) ChaCha20Poly1305Decrypt(aad []byte) *CryptoData {
-	return p.AEADDecrypt("chacha20-poly1305", aad)
-}
-func (p *CryptoData) XChaCha20Poly1305Encrypt(aad []byte) *CryptoData {
-	return p.AEADEncrypt("xchacha20-poly1305", aad)
-}
-func (p *CryptoData) XChaCha20Poly1305Decrypt(aad []byte) *CryptoData {
-	return p.AEADDecrypt("xchacha20-poly1305", aad)
 }

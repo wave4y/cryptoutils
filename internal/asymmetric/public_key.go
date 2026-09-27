@@ -1,4 +1,4 @@
-package cryptoutils
+package asymmetric
 
 import (
 	"crypto"
@@ -423,88 +423,4 @@ func DecryptElGamal(ciphertext []byte, key *ElGamalPrivateKey) ([]byte, error) {
 		return nil, fmt.Errorf("cryptoutils: invalid ElGamal ciphertext")
 	}
 	return elgamal.Decrypt(key, c1, c2)
-}
-
-func (p *CryptoData) RSAOAEPEncrypt(key *rsa.PublicKey, label []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := EncryptRSAOAEP(p.data, key, label)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) RSAOAEPDecrypt(key *rsa.PrivateKey, label []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := DecryptRSAOAEP(p.data, key, label)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) RSAPSSSign(key *rsa.PrivateKey) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := SignRSAPSS(p.data, key)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) RSAPSSVerify(key *rsa.PublicKey, signature []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	return p.fail(VerifyRSAPSS(p.data, signature, key))
-}
-func (p *CryptoData) ECDSASign(key *ecdsa.PrivateKey) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := SignECDSA(p.data, key)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) ECDSAVerify(key *ecdsa.PublicKey, signature []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	return p.fail(VerifyECDSA(p.data, signature, key))
-}
-func (p *CryptoData) Ed25519Sign(key ed25519.PrivateKey) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := SignEd25519(p.data, key)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) Ed25519Verify(key ed25519.PublicKey, signature []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	return p.fail(VerifyEd25519(p.data, signature, key))
-}
-
-// ECDH replaces the current data with a shared secret; the input data is unused.
-func (p *CryptoData) ECDH(private *ecdh.PrivateKey, public *ecdh.PublicKey) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := ECDH(private, public)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) ElGamalEncrypt(key *ElGamalPublicKey) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := EncryptElGamal(p.data, key)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) ElGamalDecrypt(key *ElGamalPrivateKey) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := DecryptElGamal(p.data, key)
-	return p.setAsymmetricResult(out, err)
-}
-func (p *CryptoData) setAsymmetricResult(out []byte, err error) *CryptoData {
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p
 }

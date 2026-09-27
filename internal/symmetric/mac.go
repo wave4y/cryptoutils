@@ -1,8 +1,9 @@
-package cryptoutils
+package symmetric
 
 import (
 	"crypto/subtle"
 	"fmt"
+
 	"golang.org/x/crypto/poly1305"
 )
 
@@ -42,6 +43,7 @@ func CMAC(algorithm string, data, key []byte) ([]byte, error) {
 	b.Encrypt(state, state)
 	return state, nil
 }
+
 func cmacDouble(b []byte) {
 	carry := b[0] >> 7
 	for i := 0; i < len(b)-1; i++ {
@@ -54,23 +56,13 @@ func cmacDouble(b []byte) {
 	}
 	b[len(b)-1] ^= rb * (carry & 1)
 }
+
 func VerifyCMAC(algorithm string, data, key, tag []byte) (bool, error) {
 	expected, err := CMAC(algorithm, data, key)
 	if err != nil {
 		return false, err
 	}
 	return subtle.ConstantTimeCompare(expected, tag) == 1, nil
-}
-func (p *CryptoData) CMAC(algorithm string) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := CMAC(algorithm, p.data, p.key)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p.Hex()
 }
 
 // Poly1305 computes a raw 16-byte one-time authenticator. Each 32-byte key MUST
@@ -85,21 +77,11 @@ func Poly1305(data, key []byte) ([]byte, error) {
 	poly1305.Sum(&tag, data, &k)
 	return tag[:], nil
 }
+
 func VerifyPoly1305(data, key, tag []byte) (bool, error) {
 	expected, err := Poly1305(data, key)
 	if err != nil {
 		return false, err
 	}
 	return subtle.ConstantTimeCompare(expected, tag) == 1, nil
-}
-func (p *CryptoData) Poly1305(key []byte) *CryptoData {
-	if p.err != nil {
-		return p
-	}
-	out, err := Poly1305(p.data, key)
-	if err != nil {
-		return p.fail(err)
-	}
-	p.data = out
-	return p.Hex()
 }
