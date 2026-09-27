@@ -15,7 +15,7 @@
 | 内部原语 | `internal/idea`、算法包内的 `internal/` | 为上层算法服务，不向外部使用者开放；本地适配源码在这里保留来源和许可证。 |
 | 兼容入口 | `utils`、`rc4` | 保留历史导入路径、类型别名和旧方法；迁移约定见 [兼容性说明](compatibility.md)。 |
 
-根包 `symmetric.go`、`asymmetric.go`、`hash.go`、`kdf.go`、`password.go` 保留公开委托函数与链式方法；`*_api.go` 连接独立算法包。链式方法把结果或错误写回 `CryptoData`，`rsa_ctf_api.go` 同样委托 `rsactf` 并适配裸 RSA 链式操作。算法计算和相应参数检查位于内部实现或独立算法子包，内部包不持有 `CryptoData`，也不反向导入根包。
+根包 `symmetric.go`、`asymmetric.go`、`hash.go`、`kdf.go`、`password.go` 保留公开委托函数与链式方法；`*_api.go` 连接独立算法包。链式方法把结果或错误写回 `CryptoData`，`rsa_ctf_api.go` 同样委托 `rsactf` 并适配裸 RSA 链式操作，`rsa_ctf_parameters_api.go` 暴露 CTF 参数解析与补全。算法计算和相应参数检查位于内部实现或独立算法子包，内部包不持有 `CryptoData`，也不反向导入根包。
 
 ```text
 使用者

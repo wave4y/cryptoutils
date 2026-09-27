@@ -61,6 +61,40 @@ result, err := cryptoutils.Init("A").
 
 ## 数学原语和攻击
 
+### 参数解析与补全
+
+| 函数或类型 | 作用 |
+| --- | --- |
+| `ParseRSAPublicParametersDER(data)` | 读取 PKCS#1 或 PKIX 公钥，返回 `RSAPublicParameters`，n/e 均为 `*big.Int`。 |
+| `ParseRSAPublicParametersPEM(data)` | 读取单个 `RSA PUBLIC KEY` 或 `PUBLIC KEY` 块。 |
+| `RSACompletePrivateParameters(p,q,e)` | 校验两个不同奇素数及指数可逆性，返回 `RSAPrivateParameters`。 |
+| `RSAPrivateExponent(e,totient)` | 返回 e 对给定 φ 或 λ 的最小正模逆；无法单独验证 totient 属于哪个 n。 |
+
+CTF 公钥解析接受 n>1、e>0，支持小模数和任意长度指数；它只解析数学参数，不保证
+这些参数满足标准 RSA 的安全策略。DER/PEM 分别最多 64/128 KiB，拒绝尾随数据、额外
+字段、多 PEM 块、错误块类型与非 RSA 算法。PKIX 的 rsaEncryption 参数接受 NULL 或省略。
+标准 `ParsePublicKeyDER/PEM` 继续使用应用级密钥校验。
+
+私钥补全要求 e>1，并返回 N、E、P、Q、Phi、Lambda、D、DP、DQ。
+其中 `D = e⁻¹ mod Lambda`，可能不同于对 Phi 求逆的值，两者均可用于对应的两素数 RSA。
+输入不变，所有输出整数彼此独立；调用者修改这些可变字段后需自行保持参数关系。
+不互素指数返回 `ErrRSACTFNoResult`，合数因子、相同因子及其他非法输入返回
+`ErrInvalidRSACTFInput`；平方模数和多素数模数不使用这个补全函数。
+
+```go
+params, err := cryptoutils.RSACompletePrivateParameters(big.NewInt(61), big.NewInt(53), big.NewInt(17))
+if err != nil {
+    return err
+}
+message, err := cryptoutils.DecryptRSARaw(params.N, params.D, big.NewInt(2790))
+// message == 65；params.D == 413，params.Lambda == 780。
+```
+
+子包对应 `ParsePublicKeyDER/PEM`、`CompletePrivateParameters`、`PrivateExponent` 和
+`PublicParameters` / `PrivateParameters` 类型；根包类型是别名，不复制实现。
+
+### 攻击接口
+
 | 函数 | 条件与边界 |
 | --- | --- |
 | `RSAIntegerRoot(x,degree)` | 非负 x 的整数根，返回根、是否精确、错误；degree≥1。 |
