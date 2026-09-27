@@ -106,6 +106,9 @@ message, err := cryptoutils.DecryptRSARaw(params.N, params.D, big.NewInt(2790))
 | `RSAFermat(n,maxSteps)` | 搜索近因子，最多检查 maxSteps 个 a²−n；偶数直接返回 2。 |
 | `RSAFactorFromPhi(n,phi)` | 根据两素数模数的 n 与 φ 恢复因子，检查判别式与输入关系。 |
 | `RSAFactorFromCRTExponent(n,e,dp,attempts)` | 从底数 2 起有限次尝试 GCD，平凡结果增加重复平方回退；dp 可替换为 dq。 |
+| `RSAWiener(n,e,maxConvergents)` | 枚举 e/n 的普通连分数收敛项，恢复小私钥指数对应的素因子；预算包含 e<n 时最初的 0/1 项。 |
+| `RSAPollardPMinusOne(n,bound,attempts)` | Pollard p−1 第一阶段；bound≥2 为平滑界，attempts 为从 2 起尝试的底数数量。 |
+| `RSAPollardRho(n,maxSteps,attempts)` | Brent 形式的 Pollard Rho；maxSteps 为全部重启和失败批次回放合计的多项式求值次数，attempts 限制重启次数。 |
 
 搜索预算是迭代次数，不是墙钟超时；一次大整数运算也可能耗时。方法未找到结果不证明
 数学上无解。共模非互素指数分支对 g=gcd(e1,e2) 尝试精确整数根，通常要求 m^g<n；
@@ -120,10 +123,36 @@ CRT 泄露的重复平方回退可处理直接 GCD 总得到 n 的部分情形�
 平方根使用 `big.Int.Sqrt`，更高次数使用整数牛顿迭代，并以整数幂判断是否精确，
 不依赖浮点精度。
 
+Wiener 与两个 Pollard 接口统一返回一个非平凡因子，不返回 d。Wiener 会验证恢复的
+两因子是不同的概率素数；Pollard 返回的因子可能仍是合数，调用方应继续分解或校验。
+得到完整的双奇素数分解后，可直接调用 `RSACompletePrivateParameters(p,n/p,e)`。
+
+```go
+p, err := cryptoutils.RSAWiener(n, e, 10000)
+if err != nil {
+    return err
+}
+params, err := cryptoutils.RSACompletePrivateParameters(p, new(big.Int).Quo(n, p), e)
+if err != nil {
+    return err
+}
+plaintext, err := cryptoutils.DecryptRSARaw(n, params.D, ciphertext)
+```
+
+新算法的零预算不进行搜索：Wiener 的 maxConvergents=0、p−1 的 attempts=0，以及 Rho
+任一预算为 0，均返回 `ErrRSACTFNoResult`。预算类型均为 uint64，支持取消且不修改输入。
+p−1 使用固定大小分段筛，避免按 bound 分配巨型数组；这不限制运行时间，大 bound
+仍可能耗时。p−1 在 GCD=n 时回放该素数幂，Rho 在失败 GCD 批次内逐步回放，减少错失
+中间因子的情况；Rho 回放同样消耗总求值预算。
+
+Wiener 仅搜索经典收敛项，没有半收敛项/Boneh–Durfee 扩展；p−1 尚无第二阶段。
+这些有界算法失败不代表模数是素数或密钥安全。
+
 ### 搜索取消
 
-`RSAIntegerRootContext`、`RSALowExponentContext`、`RSAFermatContext` 和
-`RSAFactorFromCRTExponentContext` 在原参数前增加 `context.Context`，支持取消和截止时间。
+`RSAIntegerRootContext`、`RSALowExponentContext`、`RSAFermatContext`、
+`RSAFactorFromCRTExponentContext`、`RSAWienerContext`、`RSAPollardPMinusOneContext` 和
+`RSAPollardRhoContext` 在原参数前增加 `context.Context`，支持取消和截止时间。
 子包同样使用 `IntegerRootContext` 等名称；原接口调用后台 context，签名和预算语义不变。
 
 ```go
@@ -133,7 +162,9 @@ factor, err := cryptoutils.RSAFermatContext(ctx, n, 1_000_000)
 ```
 
 取消返回 `context.Canceled` 或 `context.DeadlineExceeded`，不返回部分结果；nil context
-返回 `ErrInvalidRSACTFInput`。检查点位于搜索循环、整数根迭代及 dp 恢复的重复平方之间。
+返回 `ErrInvalidRSACTFInput`。检查点位于搜索循环、整数根迭代、dp 恢复的重复平方、
+连分数枚举、p−1 素数生成及 Rho 多项式求值之间。Wiener 候选的双素数验证不能在内部
+中断，验证返回后会再次检查取消。
 这是协作式取消，不能中断单次 `math/big` 运算，也不会启动取消后仍在后台计算的 goroutine。
 需要严格的进程级时间或内存上限时，调用方应使用独立进程。
 `ErrRSACTFNoResult` 继续表示条件不满足或预算内未找到结果，与取消错误可以区分。
@@ -150,7 +181,7 @@ factor, err := cryptoutils.RSAFermatContext(ctx, n, 1_000_000)
 
 ## 范围与测试
 
-本包当前提供以上数学原语，没有自动攻击调度或网络请求，也未集成 Wiener、Pollard、
+本包当前提供以上数学原语和有界攻击，没有自动攻击调度或网络请求，也未集成
 Franklin–Reiter、格约简、FactorDB。可以在这些原语上扩展；本次接口不表示完整覆盖
 所有 RSA 攻击。
 
@@ -168,3 +199,6 @@ go vet ./...
 近素数 Fermat、Håstad 广播、非互素指数共模、cube_root 自测题。
 回归测试同时核对期望明文和全部密文的重新加密结果。其中共模题的指数为 6/9，
 现在直接由 `CommonModulus` 恢复整数明文 12。
+Wiener 与 Pollard 测试另外固定了官方 wiener、boneh_durfee、small_q 参数，包含
+真实密文的恢复与重新加密验证。样例文件名不限定算法：boneh_durfee 的这组弱参数
+可以通过经典 Wiener 恢复，并不表示库已实现 Boneh–Durfee。
