@@ -16,7 +16,7 @@ err = cryptoutils.VerifyRSAPSS(message, signature, &privateKey.PublicKey)
 
 上述为接口片段，调用方需在每一步检查 err；变量 `message`、`label` 由调用方提供。
 
-- `GenerateRSAKey(bits)` 创建 2048..8192 位、两个素数的 RSA 私钥。输入密钥也采用这个范围，并检查公私钥字段、指数和两素数关系。
+- `GenerateRSAKey(bits)` 创建 2048..8192 位、两个素数的 RSA 私钥。输入密钥也采用这个范围，并检查公私钥字段、指数和两素数关系；私钥的 p/q 分别通过 `ProbablyPrime(32)` 概率素性检查，合数因子在导入、导出和私钥操作入口统一拒绝。
 - OAEP 的摘要和 MGF1 均使用 SHA-256；`label` 可为 nil，加解密必须一致，最多 1 MiB。最大明文长度是 `modulusBytes - 66`，即 2048 位 RSA 为 190 字节。密文是固定 `modulusBytes` 字节，不做分段大文件加密。
 - PSS 对输入消息计算 SHA-256，固定使用 32 字节随机 salt；验证同样要求 32 字节 salt。输入是消息，不是提前计算的 digest。
 - 私钥操作重建本地 CRT 缓存，避免调用方过期或损坏的 `Precomputed` 字段触发异常，也不修改传入密钥。

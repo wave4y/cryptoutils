@@ -76,6 +76,13 @@ func checkedRSAPrivate(key *rsa.PrivateKey) (*rsa.PrivateKey, error) {
 	if err := copyKey.Validate(); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrInvalidAsymmetricKey, err)
 	}
+	// Validate checks the RSA relationships but does not establish that the
+	// supplied factors are prime. A composite can satisfy those relationships.
+	for _, prime := range copyKey.Primes {
+		if !prime.ProbablyPrime(32) {
+			return nil, ErrInvalidAsymmetricKey
+		}
+	}
 	// Never trust or mutate caller-provided CRT caches, which may be stale or nil.
 	copyKey.Precompute()
 	return copyKey, nil
