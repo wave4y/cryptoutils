@@ -17,7 +17,7 @@ import (
 	"sync"
 	"testing"
 
-	c "www.gitlablow.com/wave4y/cryptoutils"
+	c "github.com/wave4y/cryptoutils"
 )
 
 var rsaFixtureOnce sync.Once

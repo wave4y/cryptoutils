@@ -2,9 +2,9 @@
 package mldsa87
 
 import (
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa87/internal"
 	"io"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa87/internal"
 )
 
 // SignToWithRandomness is the FIPS pure signing interface with explicit 32-byte

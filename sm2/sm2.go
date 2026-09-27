@@ -14,7 +14,7 @@ import (
 	"io"
 	"math/big"
 
-	"www.gitlablow.com/wave4y/cryptoutils/sm3"
+	"github.com/wave4y/cryptoutils/sm3"
 )
 
 var curve = makeCurve()

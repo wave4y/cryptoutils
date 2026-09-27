@@ -3,8 +3,8 @@ package slhdsa
 import (
 	"crypto/rand"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign"
 )
 
 func (id ID) Scheme() sign.Scheme { return scheme{id.params()} }

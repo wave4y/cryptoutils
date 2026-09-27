@@ -2,7 +2,7 @@
 // Cryptographic operations delegate to the root cryptoutils package.
 package utils
 
-import "www.gitlablow.com/wave4y/cryptoutils"
+import "github.com/wave4y/cryptoutils"
 
 // CryptoData is the shared implementation from the root package.
 type CryptoData = cryptoutils.CryptoData

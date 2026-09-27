@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"www.gitlablow.com/wave4y/cryptoutils/sm3"
+	"github.com/wave4y/cryptoutils/sm3"
 )
 
 func TestStandardVectors(t *testing.T) {

@@ -20,8 +20,8 @@ import (
 	"runtime"
 	"unsafe"
 
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
 	"golang.org/x/sys/cpu"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
 )
 
 // StateX4 contains state for the four-way permutation including the four

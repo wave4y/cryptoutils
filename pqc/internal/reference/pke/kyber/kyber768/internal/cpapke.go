@@ -5,9 +5,9 @@ package internal
 import (
 	"bytes"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/internal/common"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/internal/common"
 )
 
 // A Kyber.CPAPKE private key.

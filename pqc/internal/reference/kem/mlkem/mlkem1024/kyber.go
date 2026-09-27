@@ -10,9 +10,9 @@ import (
 	"io"
 
 	cryptoRand "crypto/rand"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem"
-	cpapke "www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/kyber1024"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem"
+	cpapke "github.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/kyber1024"
 )
 
 const (

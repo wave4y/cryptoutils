@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem/mlkem/mlkem1024"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem/mlkem/mlkem512"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem/mlkem/mlkem768"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem/mlkem/mlkem1024"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem/mlkem/mlkem512"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem/mlkem/mlkem768"
 )
 
 var (

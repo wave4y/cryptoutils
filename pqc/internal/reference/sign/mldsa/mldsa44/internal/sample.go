@@ -5,9 +5,9 @@ package internal
 import (
 	"encoding/binary"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
-	common "www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/simd/keccakf1600"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	common "github.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/simd/keccakf1600"
 )
 
 // DeriveX4Available indicates whether the system supports the quick fourway

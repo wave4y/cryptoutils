@@ -14,7 +14,7 @@ SHA-256、许可证和修改说明见 [reference/README](../pqc/internal/referen
 | MLKEM1024 | 1568 | 3168 | 1568 | 32 |
 
 ```go
-import crypto "www.gitlablow.com/wave4y/cryptoutils"
+import crypto "github.com/wave4y/cryptoutils"
 
 publicKey, privateKey, err := crypto.GenerateMLKEMKey(crypto.MLKEM768)
 if err != nil { return err }

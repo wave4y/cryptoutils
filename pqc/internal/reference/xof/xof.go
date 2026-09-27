@@ -9,8 +9,8 @@ package xof
 import (
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/xof/k12"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/xof/k12"
 
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"

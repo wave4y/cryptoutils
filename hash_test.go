@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	c "github.com/wave4y/cryptoutils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestHashVectors(t *testing.T) {

@@ -2,7 +2,7 @@
 //
 // A register of schemes is available in the package
 //
-//	www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem/schemes
+//	github.com/wave4y/cryptoutils/pqc/internal/reference/kem/schemes
 package kem
 
 import (

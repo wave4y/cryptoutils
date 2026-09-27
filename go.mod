@@ -1,4 +1,4 @@
-module www.gitlablow.com/wave4y/cryptoutils
+module github.com/wave4y/cryptoutils
 
 go 1.22
 

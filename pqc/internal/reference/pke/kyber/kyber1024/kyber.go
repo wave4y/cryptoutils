@@ -11,8 +11,8 @@ import (
 	cryptoRand "crypto/rand"
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/kem"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/kyber1024/internal"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/kem"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/kyber1024/internal"
 )
 
 const (

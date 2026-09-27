@@ -1,9 +1,9 @@
 package cryptoutils_test
 
 import (
+	c "github.com/wave4y/cryptoutils"
+	"github.com/wave4y/cryptoutils/utils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
-	"www.gitlablow.com/wave4y/cryptoutils/utils"
 )
 
 func TestUtilsCompatibility(t *testing.T) {

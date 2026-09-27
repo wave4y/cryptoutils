@@ -2,7 +2,7 @@ package cryptoutils
 
 import (
 	"encoding/hex"
-	"www.gitlablow.com/wave4y/cryptoutils/zuc"
+	"github.com/wave4y/cryptoutils/zuc"
 )
 
 // CryptZUC encrypts or decrypts with an explicit unique IV. It does not authenticate.

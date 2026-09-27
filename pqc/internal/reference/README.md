@@ -20,7 +20,8 @@ API is in `pqc/kem.go` and `pqc/signature.go`; these cores are Go internal packa
 
 Local modifications:
 
-1. Import paths were relocated from github.com/cloudflare/circl to this directory.
+1. Import paths were relocated from github.com/cloudflare/circl to
+   github.com/wave4y/cryptoutils/pqc/internal/reference in this module.
 2. SLH-DSA `readRandom` uses `io.ReadFull`, rejecting short entropy reads.
 3. Each ML-DSA internal private key has a `Validate` method checking secret
    coefficient bounds, recomputed t0 and H(public key). Public `UnmarshalBinary`

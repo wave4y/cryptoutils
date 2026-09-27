@@ -1,7 +1,7 @@
 package dilithium
 
 import (
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium/params"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium/params"
 )
 
 const (

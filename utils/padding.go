@@ -1,6 +1,6 @@
 package utils
 
-import "www.gitlablow.com/wave4y/cryptoutils"
+import "github.com/wave4y/cryptoutils"
 
 // PKCS7Padding delegates to the root implementation.
 func PKCS7Padding(src []byte, blockSize int) ([]byte, error) {

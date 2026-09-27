@@ -10,7 +10,7 @@ import (
 	"io"
 	"strings"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
 )
 
 // [ID] identifies the supported parameter sets of SLH-DSA.

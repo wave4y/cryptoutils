@@ -2,7 +2,7 @@ package cryptoutils
 
 import (
 	"errors"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc"
+	"github.com/wave4y/cryptoutils/pqc"
 )
 
 type MLKEMParameter = pqc.KEMParameter

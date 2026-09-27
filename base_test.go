@@ -3,8 +3,8 @@ package cryptoutils_test
 import (
 	"encoding/base64"
 	"errors"
+	c "github.com/wave4y/cryptoutils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestReadResultsAndReset(t *testing.T) {

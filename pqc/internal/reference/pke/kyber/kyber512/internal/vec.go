@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/internal/common"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/internal/common"
 )
 
 // A vector of K polynomials

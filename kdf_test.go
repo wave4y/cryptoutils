@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	c "www.gitlablow.com/wave4y/cryptoutils"
+	c "github.com/wave4y/cryptoutils"
 )
 
 func TestKDFKnownVectors(t *testing.T) {

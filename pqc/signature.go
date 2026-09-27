@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa44"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa65"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa87"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/slhdsa"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa44"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa65"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa87"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/slhdsa"
 )
 
 // SignatureParameter selects a complete FIPS 204 or FIPS 205 parameter set.

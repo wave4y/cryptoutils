@@ -12,7 +12,7 @@ import (
 	"math/big"
 	"testing"
 
-	c "www.gitlablow.com/wave4y/cryptoutils"
+	c "github.com/wave4y/cryptoutils"
 )
 
 func TestPEMDERRoundTripAndInteroperability(t *testing.T) {

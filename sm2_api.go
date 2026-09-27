@@ -3,7 +3,7 @@ package cryptoutils
 import (
 	"crypto/rand"
 	"errors"
-	"www.gitlablow.com/wave4y/cryptoutils/sm2"
+	"github.com/wave4y/cryptoutils/sm2"
 )
 
 type SM2PrivateKey = sm2.PrivateKey

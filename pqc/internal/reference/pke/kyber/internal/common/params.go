@@ -1,7 +1,7 @@
 package common
 
 import (
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/internal/common/params"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/pke/kyber/internal/common/params"
 )
 
 const (

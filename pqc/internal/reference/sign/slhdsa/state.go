@@ -6,7 +6,7 @@ import (
 	"hash"
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
 )
 
 // statePriv encapsulates common data for performing a private operation.

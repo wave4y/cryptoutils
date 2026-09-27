@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/wave4y/cryptoutils/internal/idea"
+	"github.com/wave4y/cryptoutils/sm4"
 	"golang.org/x/crypto/blowfish"
 	"golang.org/x/crypto/cast5"
 	"golang.org/x/crypto/tea"
 	"golang.org/x/crypto/twofish"
 	"golang.org/x/crypto/xtea"
 	"golang.org/x/crypto/xts"
-	"www.gitlablow.com/wave4y/cryptoutils/internal/idea"
-	"www.gitlablow.com/wave4y/cryptoutils/sm4"
 )
 
 // NewBlockCipher constructs AES, SM4, DES, 3DES, Blowfish, Twofish, TEA, XTEA,

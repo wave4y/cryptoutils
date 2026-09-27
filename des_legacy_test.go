@@ -5,8 +5,8 @@ import (
 	"crypto/cipher"
 	"crypto/des"
 	"fmt"
+	c "github.com/wave4y/cryptoutils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestDESCBCEnvelopeRoundTrip(t *testing.T) {

@@ -4,6 +4,20 @@ Go 链式编码、摘要、加解密、签名与密钥派生工具。需要 **Go
 
 本次扩展不新增第三方模块，也不升级原来的 `golang.org/x/crypto`。`go.mod` 中显式列出的 `x/sys` 是该原有版本已经依赖的间接模块；SM2、IDEA、CCM、CMAC、ZUC 等缺失部分在仓库内实现。
 
+## 安装
+
+```sh
+go get github.com/wave4y/cryptoutils
+```
+
+导入根包：
+
+```go
+import "github.com/wave4y/cryptoutils"
+```
+
+从旧模块路径迁移时，请将项目中的 `import` 统一更新为 `github.com/wave4y/cryptoutils`；子包也使用该前缀，例如 `github.com/wave4y/cryptoutils/sm2`。随后运行 `go mod tidy` 更新依赖记录。函数与链式 API 的使用方式不变。
+
 ## 功能与文档
 
 完整说明见 [文档导航](docs/README.md)。根包文件按编码、摘要、对称加密、公钥和算法适配命名；测试与对应功能同包放置，独立算法及其内部参考原语保留各自目录。
@@ -33,7 +47,7 @@ import (
     "fmt"
     "log"
 
-    "www.gitlablow.com/wave4y/cryptoutils"
+    "github.com/wave4y/cryptoutils"
 )
 
 func main() {
@@ -75,7 +89,7 @@ import (
     "fmt"
     "log"
 
-    "www.gitlablow.com/wave4y/cryptoutils"
+    "github.com/wave4y/cryptoutils"
 )
 
 func main() {
@@ -153,7 +167,7 @@ newCiphertext, err := cryptoutils.EncryptAESGCM(plaintext, newAESKey, nil)
 `rc4` 目录保留原来的包名 `utils`，建议导入时使用别名：
 
 ```go
-import legacyrc4 "www.gitlablow.com/wave4y/cryptoutils/rc4"
+import legacyrc4 "github.com/wave4y/cryptoutils/rc4"
 ```
 
 RC4 密文仍使用十六进制编码，仅供旧协议或 CTF。新增 `RC4Encrypt`、`RC4Decrypt`、`HexDecodeE` 和 `RandomStringE`，均返回 `(string, error)`；旧 `Rc4Encrypt`、`Rc4Decrypt`、`HexDecode`、`RandomString` 单值包装保留但标为弃用，失败时返回空字符串。`UrlEncode` 修正原来的 `UrlDncode` 拼写，旧名仍为别名。随机字符串已使用 `crypto/rand` 和无偏采样，不再修改全局伪随机数状态。

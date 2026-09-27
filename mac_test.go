@@ -2,8 +2,8 @@ package cryptoutils_test
 
 import (
 	"encoding/hex"
+	c "github.com/wave4y/cryptoutils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestAdditionalMACVectors(t *testing.T) {

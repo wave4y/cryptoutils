@@ -3,8 +3,8 @@ package mldsa44
 import (
 	"bytes"
 	"fmt"
+	"github.com/wave4y/cryptoutils/pqc/internal/kat"
 	"testing"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/kat"
 )
 
 func TestNISTACVPInternal(t *testing.T) {

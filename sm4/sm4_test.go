@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"www.gitlablow.com/wave4y/cryptoutils/sm4"
+	"github.com/wave4y/cryptoutils/sm4"
 )
 
 const (

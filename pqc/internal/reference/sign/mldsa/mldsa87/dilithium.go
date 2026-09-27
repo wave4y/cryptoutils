@@ -10,9 +10,9 @@ import (
 	"errors"
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign"
-	common "www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa87/internal"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign"
+	common "github.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/sign/mldsa/mldsa87/internal"
 )
 
 const (

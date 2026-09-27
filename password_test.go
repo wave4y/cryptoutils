@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	c "github.com/wave4y/cryptoutils"
 	"golang.org/x/crypto/bcrypt"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestBcryptKnownVector(t *testing.T) {

@@ -3,7 +3,7 @@
 package internal
 
 import (
-	common "www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
+	common "github.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
 )
 
 // Splits 0 ≤ a < q into a₀ and a₁ with a = a₁*α + a₀ with -α/2 < a₀ ≤ α/2,

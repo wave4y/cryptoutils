@@ -2,8 +2,8 @@ package cryptoutils_test
 
 import (
 	"bytes"
+	c "github.com/wave4y/cryptoutils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestAdditionalAEAD(t *testing.T) {

@@ -7,8 +7,8 @@ import (
 	"crypto/subtle"
 	"io"
 
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
-	common "www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/sha3"
+	common "github.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
 )
 
 const (

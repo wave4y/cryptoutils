@@ -12,8 +12,8 @@ import (
 	"io"
 	"math/big"
 
-	"www.gitlablow.com/wave4y/cryptoutils/sm3"
-	"www.gitlablow.com/wave4y/cryptoutils/sm9/internal/bn256"
+	"github.com/wave4y/cryptoutils/sm3"
+	"github.com/wave4y/cryptoutils/sm9/internal/bn256"
 )
 
 const (

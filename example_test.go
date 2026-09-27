@@ -3,7 +3,7 @@ package cryptoutils_test
 import (
 	"crypto/rand"
 	"fmt"
-	c "www.gitlablow.com/wave4y/cryptoutils"
+	c "github.com/wave4y/cryptoutils"
 )
 
 func ExampleCryptoData_Reset() {

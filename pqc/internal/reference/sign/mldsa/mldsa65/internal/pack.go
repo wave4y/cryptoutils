@@ -3,7 +3,7 @@
 package internal
 
 import (
-	common "www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
+	common "github.com/wave4y/cryptoutils/pqc/internal/reference/sign/internal/dilithium"
 )
 
 // Writes p with norm less than or equal η into buf, which must be of

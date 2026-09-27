@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"www.gitlablow.com/wave4y/cryptoutils"
+	"github.com/wave4y/cryptoutils"
 )
 
 func TestPKCS7PaddingRoundTrip(t *testing.T) {

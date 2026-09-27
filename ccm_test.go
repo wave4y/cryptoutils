@@ -3,8 +3,8 @@ package cryptoutils_test
 import (
 	"bytes"
 	"encoding/hex"
+	c "github.com/wave4y/cryptoutils"
 	"testing"
-	c "www.gitlablow.com/wave4y/cryptoutils"
 )
 
 func TestCCMRFC3610(t *testing.T) {

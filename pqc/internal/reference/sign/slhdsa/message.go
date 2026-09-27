@@ -5,8 +5,8 @@ import (
 	"hash"
 	"io"
 
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/xof"
 	_ "golang.org/x/crypto/sha3"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/xof"
 )
 
 // [PreHash] is a helper for hashing a message before signing.

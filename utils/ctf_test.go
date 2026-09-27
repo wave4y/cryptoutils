@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"www.gitlablow.com/wave4y/cryptoutils/utils"
+	"github.com/wave4y/cryptoutils/utils"
 )
 
 func TestStringEscapes(t *testing.T) {

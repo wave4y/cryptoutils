@@ -5,8 +5,8 @@ import (
 	"crypto"
 	"crypto/subtle"
 
+	"github.com/wave4y/cryptoutils/pqc/internal/reference/internal/conv"
 	"golang.org/x/crypto/cryptobyte"
-	"www.gitlablow.com/wave4y/cryptoutils/pqc/internal/reference/internal/conv"
 )
 
 // [PrivateKey] stores a private key of the SLH-DSA scheme.

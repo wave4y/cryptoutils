@@ -2,7 +2,7 @@ package cryptoutils
 
 import (
 	"crypto/rand"
-	"www.gitlablow.com/wave4y/cryptoutils/sm9"
+	"github.com/wave4y/cryptoutils/sm9"
 )
 
 // SM9 key types keep their scalar and curve-point representations private.
